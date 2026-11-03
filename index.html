@@ -692,12 +692,20 @@ function saveNow() {
 }
 let cloudTimer = null, mirrorTimer = null, profileMirrorTimer = null;
 let cloudOn = false, restoreHold = 0, cloudLastParts = null, cloudSizeWarned = false;
+/* MY_DEV marks every snapshot this device publishes — when the same state comes back
+   to us (echo or retained re-delivery) we ignore it instead of re-applying it.
+   lastLocalEditAt guards the live-refresh so a remote update never yanks the editor
+   out from under fingers that are actively typing. */
+const MY_DEV = 'd' + uid();
+let lastLocalEditAt = 0;
+function dataSignature(d) { try { return JSON.stringify({ n: d.nodes, w: d.workspaces }); } catch (e) { return ''; } }
+function saveLocalOnly() { try { localStorage.setItem(LS_KEY, JSON.stringify(db)); } catch (e) {} setSaveState('saved'); }
 function cloudPush() {
   /* shortly after each burst of edits, the whole workspace is snapshotted to the live
-     server (retained, under this ID) — that snapshot is what any other device pulls
-     when someone signs in with the ID + password. */
+     server (retained, under this ID) — every OTHER signed-in device receives it live
+     within a second or two, and it is also what a new device pulls at sign-in. */
   clearTimeout(cloudTimer);
-  cloudTimer = setTimeout(cloudPushNow, 1400);
+  cloudTimer = setTimeout(cloudPushNow, 1200);
 }
 function cloudPushNow() {
   if (!session || session.guest) return;
@@ -722,7 +730,7 @@ function cloudPushNow() {
   }).catch(() => {});
 }
 const saveSoon = debounce(saveNow, 500);
-function markDirty() { setSaveState('busy'); saveSoon(); }
+function markDirty() { lastLocalEditAt = now(); setSaveState('busy'); saveSoon(); }
 function setSaveState(s) {
   const el = $('#saveState'); if (!el) return;
   const signed = session && !session.guest;
@@ -993,7 +1001,7 @@ function collectParts(id, n, opts) {
     const gotArr = () => Object.keys(got).map(k => +k).sort((a, b) => a - b).map(i => got[i]);
     const finish = v => { if (done) return; done = true; clearTimeout(to); try { c.end(true); } catch (e) {} resolve(v); };
     to = setTimeout(() => finish({ parts: gotArr(), connected: sawConn, complete: Object.keys(got).length >= n }), opts.timeout || 9000);
-    c.on('connect', () => { sawConn = true; try { c.subscribe(cTopic('state', id, 'p+'), { qos: 0 }); } catch (e) {} });
+    c.on('connect', () => { sawConn = true; try { c.subscribe(cTopic('state', id) + '/+', { qos: 0 }); } catch (e) {} });   /* fixed wildcard: matches p0, p1, … */
     c.on('message', (t, payload) => {
       const s = payload.toString(); if (!s) return;
       try {
@@ -1045,12 +1053,12 @@ async function buildStateMessages(id, data) {
   const g = await gzipB64(json);
   if (g && g.length < json.length * 0.9) { body = g; gz = 1; }
   const at = now();
-  if (body.length <= CHUNK_TARGET) return { manifest: { app: 'syncro', type: 'state', id, v: 1, at, gz, parts: 0, data: body }, chunks: [] };
+  if (body.length <= CHUNK_TARGET) return { manifest: { app: 'syncro', type: 'state', id, dev: MY_DEV, v: 1, at, gz, parts: 0, data: body }, chunks: [] };
   const parts = Math.ceil(body.length / CHUNK_TARGET);
   if (parts > MAX_PARTS) return { tooBig: true };
   const chunks = [];
   for (let i = 0; i < parts; i++) chunks.push({ app: 'syncro', type: 'chunk', id, i, d: body.slice(i * CHUNK_TARGET, (i + 1) * CHUNK_TARGET) });
-  return { manifest: { app: 'syncro', type: 'state', id, v: 1, at, gz, parts }, chunks };
+  return { manifest: { app: 'syncro', type: 'state', id, dev: MY_DEV, v: 1, at, gz, parts }, chunks };
 }
 /* persistent live connection — answers handshake pings while this device holds the ID */
 function announceProfile() {
@@ -1072,6 +1080,11 @@ function connectCloud() {
   c.on('connect', () => {
     cloudOn = true; setSaveState('saved');
     try { c.subscribe(cTopic('need', id), { qos: 0 }); } catch (e) {}
+    /* LIVE SYNC — also listen on this ID's state topics: whenever another device
+       signed in with the same ID publishes its snapshot, it lands here within a
+       second and gets merged into the open workspace, no re-login needed. */
+    try { c.subscribe(cTopic('state', id), { qos: 0 }); } catch (e) {}
+    try { c.subscribe(cTopic('state', id) + '/+', { qos: 0 }); } catch (e) {}   /* NB: 'p+' is NOT a wildcard in MQTT — '+' must own the whole level */
     announceProfile();                       /* keep the retained profile fresh */
     cloudLastParts = null;
     cloudPushNow();                          /* re-assert the retained state after (re)connect */
@@ -1079,19 +1092,81 @@ function connectCloud() {
   c.on('close', () => { cloudOn = false; setSaveState('saved'); });
   c.on('error', () => {});
   c.on('message', (topic, payload) => {
-    if (topic !== cTopic('need', id)) return;
-    let d; try { d = JSON.parse(payload.toString()); } catch (e) { return; }
-    if (!d || d.app !== 'syncro' || d.type !== 'need' || normId(d.id) !== id) return;
-    if (d.want === 'state') {
-      const data = db.data[id];
-      if (!data) return;
-      buildStateMessages(id, data).then(built => {
-        if (built.tooBig) return;
-        publishLive(cTopic('state', id), built.manifest, false);
-        built.chunks.forEach(ch => publishLive(cTopic('state', id, 'p' + ch.i), ch, false));
-      }).catch(() => {});
-    } else announceProfile();
+    if (topic === cTopic('need', id)) {
+      let d; try { d = JSON.parse(payload.toString()); } catch (e) { return; }
+      if (!d || d.app !== 'syncro' || d.type !== 'need' || normId(d.id) !== id) return;
+      if (d.want === 'state') {
+        const data = db.data[id];
+        if (!data) return;
+        buildStateMessages(id, data).then(built => {
+          if (built.tooBig) return;
+          publishLive(cTopic('state', id), built.manifest, false);
+          built.chunks.forEach(ch => publishLive(cTopic('state', id, 'p' + ch.i), ch, false));
+        }).catch(() => {});
+      } else announceProfile();
+      return;
+    }
+    if (topic === cTopic('state', id)) { handleLiveState(id, payload); return; }
+    /* chunk topics: consumed on demand by collectParts() during a live adoption */
   });
+}
+/* ---------- live sync receiver — another device just published under this ID ----------
+   Coalesced briefly, own echoes skipped, then decoded (inline or chunked), merged
+   per-document (last write wins) and the UI refreshed without a re-login. */
+let liveStateTimer = null, liveStatePending = null, liveAdopting = false, lastLiveToast = 0, lastReassert = 0;
+function handleLiveState(id, payload) {
+  if (!session || session.guest || session.id !== id) return;
+  if (now() < restoreHold) return;                    /* a sign-in restore is in flight */
+  let d; try { d = JSON.parse(payload.toString()); } catch (e) { return; }
+  if (!d || d.app !== 'syncro' || d.type !== 'state' || d.id !== id) return;
+  if (d.dev && d.dev === MY_DEV) return;              /* our own publish coming back */
+  liveStatePending = d;
+  clearTimeout(liveStateTimer);
+  liveStateTimer = setTimeout(applyLiveState, 350);   /* coalesce rapid bursts */
+}
+async function applyLiveState() {
+  const id = session && !session.guest && session.id;
+  if (!id) return;
+  const manifest = liveStatePending; liveStatePending = null;
+  if (!manifest || liveAdopting) return;
+  const local = db.data[id];
+  if (!local) return;
+  liveAdopting = true;
+  try {
+    const r = await decodeStateMsg(id, manifest, true);
+    if (!r || !r.data || !Array.isArray(r.data.workspaces) || !r.data.nodes) return;
+    const mine = dataSignature(local);
+    const cloudAt = Math.max(manifest.at || 0, r.data._syncedAt || 0);
+    const baseAt = local._syncedAt || 0;
+    if (cloudAt && baseAt && cloudAt <= baseAt - 2000) {
+      /* the incoming snapshot is OLDER than what we already have (e.g. a device that
+         was offline just reconnected) — politely re-assert our newer state instead */
+      if (now() - lastReassert > 5000) { lastReassert = now(); cloudPushNow(); }
+      return;
+    }
+    const openBefore = current.docId ? JSON.stringify(local.nodes[current.docId] || null) : null;
+    const merged = mergeWorkspaces(local, r.data);
+    if (dataSignature(merged) === mine) {
+      local._syncedAt = Math.max(baseAt, cloudAt);    /* nothing new — do NOT republish (breaks echo loops) */
+      saveLocalOnly();
+      return;
+    }
+    merged._syncedAt = now();
+    db.data[id] = merged;
+    vaultArchive(id, merged);
+    saveLocalOnly();
+    /* refresh: the sidebar always; the open document only if it actually changed
+       and the user hasn't typed for a moment (never clobber active typing) */
+    if (!merged.workspaces.find(w => w.id === current.wsId)) current.wsId = merged.workspaces.length ? merged.workspaces[0].id : null;
+    renderSidebar();
+    const openAfter = current.docId ? JSON.stringify(merged.nodes[current.docId] || null) : null;
+    if (openAfter !== openBefore) {
+      if (now() - lastLocalEditAt > 4000) openDoc(current.docId);
+      else refreshDocChrome();
+    } else refreshDocChrome();
+    if (now() - lastLiveToast > 6000) { lastLiveToast = now(); toast('Live sync — updates just arrived from your other device.', 'ok'); }
+  } catch (e) {}
+  finally { liveAdopting = false; }
 }
 function disconnectCloud(flushMs) {
   if (!cloudClient) return;
@@ -1251,7 +1326,7 @@ function guestSession() {
 function logout() {
   const id = session && session.id;
   if (id && db.data[id]) vaultArchive(id, db.data[id]);   /* save everything BEFORE wiping — next sign-in here restores it instantly, even offline */
-  clearTimeout(cloudTimer); clearTimeout(mirrorTimer); clearTimeout(profileMirrorTimer);
+  clearTimeout(cloudTimer); clearTimeout(mirrorTimer); clearTimeout(profileMirrorTimer); clearTimeout(liveStateTimer);
   disconnectCloud(400);
   session = null; db.session = null; saveNow();
   $('#app').classList.add('hidden');
@@ -1433,7 +1508,7 @@ function renderGateForm() {
       '<div class="form-field"><label>Password</label><input class="inp" id="gPass" type="password" placeholder="At least 4 characters" autocomplete="new-password"></div>' +
       '<div class="form-field"><label>Repeat password</label><input class="inp" id="gPass2" type="password" placeholder="Same password again" autocomplete="new-password"></div>' +
       '<button class="btn btn-primary btn-block" id="gSubmit" type="submit">Create my ID</button>' +
-      '<div class="gate-hint">Pick any free ID — 3–14 letters or numbers. It goes live on the SYNCRO server, and your ID + password unlock the same workspace on every device.</div>'
+      '<div class="gate-hint">Pick any free ID — 3–14 letters or numbers. It goes live on the SYNCRO server, and your ID + password unlock the same workspace on every device — live.</div>'
     : gateIdField('gId', preId) +
       '<div class="form-field"><label>Password</label><input class="inp" id="gPass" type="password" placeholder="Your password" autocomplete="current-password"></div>' +
       (known.length ? '<div class="known-wrap"><div class="kw-t">On this device — one tap to fill</div>' + known.map(k =>
@@ -1441,7 +1516,7 @@ function renderGateForm() {
         '<span style="min-width:0"><span class="kn">' + esc(k.name || k.id) + '</span><br><span class="ki">' + esc(chunkId(k.id)) + '</span></span></button>').join('') + '</div>' : '') +
       '<div class="gate-steps" id="gStep"></div>' +
       '<button class="btn btn-primary btn-block" id="gSubmit" type="submit">Verify &amp; sign in</button>' +
-      '<div class="gate-hint">IDs saved here sign in instantly, even offline. On a new device, the live server finds your ID and restores your whole workspace.</div>' +
+      '<div class="gate-hint">IDs saved here sign in instantly, even offline. On a new device, the live server finds your ID and restores your whole workspace — and every signed-in device sees new edits within seconds.</div>' +
       '<div class="g-keywrap" id="gNoAccWrap"><button type="button" class="btn btn-block" id="gNoAcc">Create this ID now</button></div>');
   $$('[data-dice]', $('#gateForm')).forEach(b => b.addEventListener('click', () => {
     const nm = $('#gName') ? $('#gName').value : '';
@@ -1596,14 +1671,14 @@ function settingsModal() {
     (!session.guest
       ? '<div class="label" style="margin-top:10px">Live server</div>' +
         '<div class="set-row"><div class="s-info"><div class="s-t">Cross-device sync</div><div class="s-d">' +
-        'Your whole workspace is snapshotted to the live server under ' + esc(chunkId(session.id)) + ' as you edit. Sign in with that ID + your password on any device and everything comes back.' + '</div></div>' +
+        'Your workspace is snapshotted to the live server under ' + esc(chunkId(session.id)) + ' as you edit. Sign in with that ID + your password on any device and everything comes back — and while both devices are signed in, edits made on one appear on the other within a second or two.' + '</div></div>' +
         '<span class="kind-badge">' + (cloudOn ? 'Connected' : 'Offline') + '</span></div>' +
         '<div class="set-row"><div class="s-info"><div class="s-t">Server</div><div class="s-d" style="font-family:\'JetBrains Mono\',monospace;font-size:11px;word-break:break-all">' + esc(MQTT_URL) + '</div></div></div>'
       : '') +
     '<div class="label" style="margin-top:10px;color:var(--danger)">Danger zone</div>' +
     '<div class="set-row"><div class="s-info"><div class="s-t">Delete ID</div><div class="s-d">Removes your ID from the live server and this device, with every document</div></div>' +
       '<button class="btn btn-sm btn-danger" id="sDelete">' + I.trash(14) + 'Delete</button></div>' +
-    '<div class="rp-hint" style="margin-top:10px">Your ID is public on the live server so any device can find it; your password never leaves this device unhashed (salted SHA-256). Version 1.4 — ID sign-in</div></div>', { wide: true });
+    '<div class="rp-hint" style="margin-top:10px">Your ID is public on the live server so any device can find it; your password never leaves this device unhashed (salted SHA-256). Version 1.5 — live cross-device sync</div></div>', { wide: true });
   $('#thLight').addEventListener('click', () => { applyTheme('light'); saveSoon(); settingsModal(); });
   $('#thDark').addEventListener('click', () => { applyTheme('dark'); saveSoon(); settingsModal(); });
   const sCreate = $('#sCreate');
