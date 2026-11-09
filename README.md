@@ -1,5 +1,6 @@
 # Syncro — the live ID network, served entirely by Python
 
+https:/syncro.unfo.workers.dev
 **Make an ID. Keep everything.** Syncro is a profile-making and live-presence
 system where every user asset (profile pictures) and every trace of user work
 (profile edits, sign-ins, friend graph, message threads, activity history) is
