@@ -32,7 +32,7 @@
   --shadow-sm:0 2px 10px rgba(0,0,0,.08);
   --r-lg:4px; --r-md:3px; --r-sm:2px;
   --topbar-h:54px; --sb-w:272px; --rp-w:292px;
-  --font-ui:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --font-ui:'Anthropic Sans','Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
 }
 html[data-theme="dark"]{
   --bg:#0c0c0d; --bg-deep:#080809;
@@ -47,6 +47,23 @@ html[data-theme="dark"]{
   --on-accent:#0b0b0c;
   --shadow:0 14px 38px rgba(0,0,0,.55), 0 2px 10px rgba(0,0,0,.45);
   --shadow-sm:0 2px 12px rgba(0,0,0,.4);
+}
+/* PIXEL TERMINAL — white & blue, futuristic, zero curves, hard block shadows */
+html[data-theme="pixel"]{
+  --bg:#eef3fc; --bg-deep:#e4ebfa;
+  --panel:#ffffff; --panel2:#f3f7ff; --hover:#e7eefc; --active:#dce8fc;
+  --border:#ccd9f2; --border2:#9fb9ea;
+  --text:#0b1c3d; --text2:#3d5784; --text3:#6e86b2;
+  --accent:#1f5eff; --accent-deep:#0f41d4;
+  --accent-soft:#dbe7ff; --accent-softer:#ecf2ff;
+  --accent-glow:rgba(31,94,255,.30);
+  --danger:#e11d48; --danger-soft:#ffe3ea;
+  --ok:#0e9f6e; --warn:#d97706;
+  --on-accent:#ffffff;
+  --shadow:8px 8px 0 rgba(11,42,102,.16);
+  --shadow-sm:4px 4px 0 rgba(11,42,102,.14);
+  --r-lg:0px; --r-md:0px; --r-sm:0px;
+  --font-ui:'JetBrains Mono',ui-monospace,SFMono-Regular,'Courier New',monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
@@ -449,26 +466,221 @@ table.vgrid td.fxc{color:var(--accent-deep); font-weight:600}
   .doc-title{font-size:22px}
   .savestate span{display:none}
 }
+/* ---------- owner badge & profile picture ---------- */
+.owner-badge{display:inline-block;vertical-align:2px;margin-left:7px;font-size:8.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--panel);background:var(--text);border-radius:3px;padding:2.5px 7px}
+.avatar{position:relative;overflow:visible}
+.avatar img.pimg{width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block}
+.avatar .cam{position:absolute;bottom:-3px;right:-3px;width:20px;height:20px;border-radius:50%;background:var(--text);color:var(--panel);display:none;align-items:center;justify-content:center;border:2px solid var(--panel)}
+.avatar:hover .cam{display:flex}
+#pAvatar{cursor:pointer}
+.pd-themes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:4px 0 2px}
+.pd-theme{border:1.5px solid var(--border);border-radius:6px;padding:0;overflow:hidden;cursor:pointer;background:var(--panel);text-align:left;transition:border-color .15s, transform .12s}
+.pd-theme:hover{transform:translateY(-2px)}
+.pd-theme.on{border-color:var(--text);box-shadow:0 0 0 1px var(--text)}
+.pd-shot{height:64px;position:relative;padding:8px 9px}
+.pd-shot .cov{position:absolute;inset:0;display:block}
+.pd-shot .bar{position:relative;display:block;height:5px;width:56%;border-radius:2px;margin:14px 0 5px}
+.pd-shot .ln{position:relative;display:block;height:3.5px;width:78%;border-radius:2px;margin-bottom:4px;opacity:.55}
+.pd-name{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:7px 9px;font-size:11.5px;font-weight:700;color:var(--text);border-top:1px solid var(--border)}
+.pd-name .pd-tag{font-size:9px;font-weight:600;color:var(--text3);text-align:right;line-height:1.25}
+.pd-opts{display:flex;flex-direction:column;gap:9px;margin:12px 0 2px}
+.pd-check{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer}
+.pd-check input{width:15px;height:15px;accent-color:var(--text)}
+.pd-note{font-size:11.5px;color:var(--text3);line-height:1.5;margin-top:10px}
+/* ---------- the intro — a notebook opens, on every visit ---------- */
+#intro{position:fixed;inset:0;z-index:90;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:34px 16px;overflow:auto;
+  background:radial-gradient(1100px 640px at 50% 36%,var(--panel),var(--bg) 72%)}
+#intro.bye{opacity:0;pointer-events:none;transition:opacity .38s ease}
+body.introing{overflow:hidden}
+#intro .in-skip{position:absolute;top:16px;right:16px;color:var(--text3)}
+.in-stage{display:flex;flex-direction:column;align-items:center;gap:24px;transition:transform .55s cubic-bezier(.6,0,.3,1)}
+#intro.small .in-stage{transform:translateY(-6px) scale(.6)}
+.in-book{position:relative;width:192px;height:252px;perspective:1500px;animation:bookFloat 4.6s ease-in-out 1.2s infinite}
+@keyframes bookFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.in-book .in-page{position:absolute;inset:4px 7px 6px 13px;border-radius:3px 9px 9px 3px;background:#f7f3ea;
+  border:1px solid rgba(0,0,0,.10);transform-origin:left center;box-shadow:0 10px 26px rgba(0,0,0,.14)}
+.in-book .in-page.p3{transform:rotateY(-26deg)}
+.in-book .in-page.p2{transform:rotateY(-52deg)}
+.in-book .in-page.p1{transform:rotateY(-78deg);overflow:hidden}
+.in-book .in-page .ruled{position:absolute;inset:22px 16px 18px 22px;
+  background:repeating-linear-gradient(to bottom,transparent 0 21px,rgba(0,0,0,.07) 21px 22px)}
+.in-book .in-page .scr{position:absolute;height:8px;border-radius:4px;background:rgba(0,0,0,.13)}
+.in-book .in-page .scr.s1{top:24px;left:22px;width:62%}
+.in-book .in-page .scr.s2{top:45px;left:22px;width:44%}
+.in-book .in-page .scr.s3{top:87px;left:22px;width:70%}
+.in-book .in-page .scr.s4{top:108px;left:22px;width:38%}
+.in-book .in-page .gd{position:absolute;top:63px;left:22px;width:9px;height:9px;border-radius:50%;background:#3fae44}
+.in-book .in-cover{position:absolute;inset:0;border-radius:5px 12px 12px 5px;transform-origin:left center;transform-style:preserve-3d;
+  background:linear-gradient(150deg,#221e19,#34302a 58%,#272320);color:#f2efe8;
+  box-shadow:16px 24px 48px rgba(0,0,0,.34),inset 0 0 0 1px rgba(255,255,255,.05);
+  display:flex;align-items:center;justify-content:center;
+  animation:coverOpen 1.55s cubic-bezier(.7,0,.24,1) .55s forwards}
+.in-book .in-cover::after{content:'';position:absolute;inset:0;border-radius:inherit;backface-visibility:hidden;transform:rotateY(180deg);
+  background:linear-gradient(150deg,#efe9db,#ddd4bf);box-shadow:inset 0 0 34px rgba(0,0,0,.10)}
+@keyframes coverOpen{0%{transform:rotateY(0)}100%{transform:rotateY(-163deg)}}
+.in-cover .in-mark{font-weight:800;letter-spacing:.32em;font-size:14px;display:flex;align-items:center;gap:9px;padding-left:.32em}
+.in-cover .in-mark i{width:8px;height:8px;border-radius:50%;background:#3fae44}
+.in-word{font-weight:800;letter-spacing:.42em;font-size:26px;color:var(--text);opacity:0;transform:translateY(8px);
+  transition:opacity .7s ease .25s,transform .7s ease .25s;padding-left:.42em}
+#intro.word .in-word{opacity:1;transform:none}
+.in-cards{position:relative;width:min(600px,92vw);margin-top:6px}
+.in-card{display:none;width:100%;flex-direction:column;align-items:center;justify-content:flex-start;gap:13px;text-align:center}
+.in-card.on{display:flex;opacity:0;transform:translateY(14px);animation:inFade .45s ease .05s forwards}
+@keyframes inFade{to{opacity:1;transform:none}}
+.in-kick{font-size:11px;font-weight:800;letter-spacing:.3em;text-transform:uppercase;color:var(--text3)}
+.in-big{font-size:30px;line-height:1.16;font-weight:800;color:var(--text);max-width:520px;letter-spacing:-.01em}
+.in-sub{font-size:14px;line-height:1.6;color:var(--text2);max-width:470px}
+.in-chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.in-chips .chip{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:var(--text2);
+  border:1px solid var(--border);border-radius:999px;padding:7px 13px;background:var(--panel)}
+.in-chips .chip i{width:7px;height:7px;border-radius:50%;background:#3fae44}
+.in-why{font-size:13px;line-height:1.65;color:var(--text3);max-width:480px;border-top:1px solid var(--border);padding-top:13px;margin-top:2px}
+.in-why b{color:var(--text2)}
+.in-form{display:flex;flex-direction:column;gap:10px;width:min(330px,86vw);text-align:left;margin-top:2px}
+.in-form .inp{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:11px 12px;font-size:14px;color:var(--text);outline:none;width:100%}
+.in-form .inp:focus{border-color:var(--text3)}
+.in-form label{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--text3)}
+.in-alt{font-size:12.5px;color:var(--text3)}
+.in-alt button{background:none;border:none;color:var(--text);font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.in-form .frow{display:flex;gap:8px}
+.in-form .frow>div{flex:1;min-width:0}
+.in-note{font-size:11px;line-height:1.5;color:var(--text3);text-align:left;margin-top:-3px}
+.in-note b{color:var(--text2)}
+.in-idcheck{font-size:12px;font-weight:600;min-height:16px;color:var(--text3);text-align:left}
+.in-idcheck.taken{color:var(--danger)}
+.in-idcheck.free{color:#3fae44}
+.ue-t{width:100%;border-collapse:collapse;font-size:12px;margin:8px 0 4px}
+.ue-code{font-family:'JetBrains Mono',monospace;font-size:10px;line-height:1.5;white-space:pre;overflow:auto;max-height:190px;
+  background:var(--panel2);border:1px solid var(--border);border-radius:4px;padding:10px;text-align:left;user-select:all;color:var(--text2)}
+.ue-steps{font-size:12.5px;line-height:1.75;color:var(--text2);text-align:left;background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:10px 12px;margin-top:10px}
+.ue-t th{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);text-align:left;padding:5px 6px;border-bottom:1px solid var(--border)}
+.ue-t td{padding:6px;border-bottom:1px solid var(--border);color:var(--text2);text-align:left;word-break:break-all}
+.in-dots{display:flex;gap:7px;margin-top:16px}
+.in-dots b{width:6px;height:6px;border-radius:50%;background:var(--border2);transition:background .3s}
+.in-dots b.on{background:var(--text)}
+
+/* ---------- note images — attach, upload, side previews ---------- */
+.nimg-wrap{position:relative;margin:.45em 0;max-width:100%;border-radius:6px}
+.nimg-wrap .nimg{display:block;max-width:100%;max-height:440px;border-radius:6px;border:1px solid var(--border)}
+.nimg-wrap.up .nimg{opacity:.5;filter:saturate(.5)}
+.nimg-up{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:9px;font-size:12px;font-weight:700;
+  color:var(--text2);background:rgba(255,255,255,.5);border-radius:6px}
+.nimg-up i{width:13px;height:13px;border:2px solid var(--border2);border-top-color:var(--text);border-radius:50%;animation:spin08 .8s linear infinite}
+@keyframes spin08{to{transform:rotate(360deg)}}
+[data-theme="dark"] .nimg-up{background:rgba(22,22,25,.5)}
+.note-page.drop{outline:2px dashed var(--border2);outline-offset:8px;border-radius:6px}
+#secImages .nimg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
+.nthumb{position:relative;aspect-ratio:1;border:1px solid var(--border);border-radius:4px;overflow:hidden;padding:0;background:var(--panel2);cursor:pointer}
+.nthumb img{width:100%;height:100%;object-fit:cover;display:block}
+.nthumb .nx{position:absolute;top:3px;right:3px;width:19px;height:19px;border-radius:50%;background:rgba(0,0,0,.62);color:#fff;
+  display:none;align-items:center;justify-content:center}
+.nthumb:hover .nx{display:flex}
+.nthumb.up::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.45)}
+.nimg-empty{font-size:11.5px;color:var(--text3);margin-bottom:8px}
+.v-lightbox{text-align:center}
+.v-lightbox img{max-width:100%;max-height:66vh;border-radius:6px;border:1px solid var(--border)}
+
 /* ---------- print (PDF) ---------- */
 #printArea{display:none}
 @media print{
   body{overflow:visible; background:#fff}
   #app,#gate,#viewer,.modal-ov,.toasts,.float-tb,.backdrop{display:none!important}
-  #printArea{display:block!important; color:#141416; font-family:Georgia,'Times New Roman',serif; font-size:12.5pt; line-height:1.6}
-  #printArea h1{font-size:22pt; margin:0 0 6mm}
-  #printArea .pr-title{font-size:20pt; font-weight:bold; border-bottom:2px solid #141416; padding-bottom:3mm; margin-bottom:6mm}
-  #printArea .pr-kind{font-size:9pt; letter-spacing:.14em; text-transform:uppercase; color:#141416; font-weight:bold; margin-bottom:2mm}
-  #printArea table.pr-sheet{border-collapse:collapse; width:100%; font-family:Arial,sans-serif; font-size:9.5pt}
-  #printArea table.pr-sheet th,#printArea table.pr-sheet td{border:1px solid #c6c6ca; padding:2.2mm 3mm}
-  #printArea table.pr-sheet th{background:#f0f0f1; text-align:center}
-  #printArea table.pr-sheet td.num{text-align:right; font-variant-numeric:tabular-nums}
-  #printArea .pr-board h3{font-size:13pt; margin:7mm 0 2.5mm; color:#141416}
-  #printArea .pr-board li{margin:0 0 2mm 6mm}
-  #printArea a{color:#141416}
+  #printArea{display:block!important}
 }
+/* ---------- pixel theme — hard edges only, blocky terminal chrome ---------- */
+html[data-theme="pixel"] *{border-radius:0 !important}
+html[data-theme="pixel"] body{
+  background-image:linear-gradient(rgba(31,94,255,.05) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(31,94,255,.05) 1px,transparent 1px);
+  background-size:24px 24px}
+html[data-theme="pixel"] ::selection{background:#1f5eff;color:#fff}
+html[data-theme="pixel"] ::-webkit-scrollbar-thumb{border-radius:0}
+html[data-theme="pixel"] .btn{border-width:1.5px; box-shadow:3px 3px 0 rgba(11,42,102,.15)}
+html[data-theme="pixel"] .btn:active{transform:translate(2px,2px); box-shadow:1px 1px 0 rgba(11,42,102,.15)}
+html[data-theme="pixel"] .btn-primary{box-shadow:3px 3px 0 rgba(11,42,102,.30)}
+html[data-theme="pixel"] .btn-primary:active{box-shadow:1px 1px 0 rgba(11,42,102,.30)}
+html[data-theme="pixel"] .btn-ghost{box-shadow:none}
+html[data-theme="pixel"] .iconbtn{border:1.5px solid transparent}
+html[data-theme="pixel"] .iconbtn:hover{border-color:var(--border2); background:var(--panel2)}
+html[data-theme="pixel"] .iconbtn.on{border-color:var(--accent); background:var(--accent-soft)}
+html[data-theme="pixel"] .inp{border-width:1.5px}
+html[data-theme="pixel"] .inp:focus{box-shadow:3px 3px 0 var(--accent-glow)}
+html[data-theme="pixel"] .modal{border:2px solid var(--text); box-shadow:8px 8px 0 rgba(11,42,102,.22)}
+html[data-theme="pixel"] .gate-card{border:2px solid var(--text); box-shadow:8px 8px 0 rgba(11,42,102,.22)}
+html[data-theme="pixel"] .seg{border-width:1.5px}
+html[data-theme="pixel"] .seg button.on{box-shadow:inset 0 0 0 1.5px var(--accent); color:var(--accent-deep)}
+html[data-theme="pixel"] .tree-row.active{box-shadow:inset 3px 0 0 var(--accent)}
+html[data-theme="pixel"] .pd-theme{border-width:1.5px}
+html[data-theme="pixel"] .pd-theme.on{border-color:var(--accent); box-shadow:0 0 0 1.5px var(--accent)}
+html[data-theme="pixel"] .topbar,html[data-theme="pixel"] .sidebar{border-color:var(--border2)}
+html[data-theme="pixel"] .savestate i{border-radius:0; background:var(--accent)}
+html[data-theme="pixel"] .wordmark{letter-spacing:.3em}
+html[data-theme="pixel"] .nimg-up{background:rgba(8,22,48,.55)}
 </style>
 </head>
 <body>
+<!-- ================= first-visit intro — a notebook opens ================= -->
+<div id="intro" class="hidden">
+  <button class="iconbtn in-skip" id="inSkip" title="Skip the introduction">Skip</button>
+  <div class="in-stage">
+    <div class="in-book">
+      <div class="in-page p3"></div>
+      <div class="in-page p2"></div>
+      <div class="in-page p1"><span class="ruled"></span><span class="scr s1"></span><span class="scr s2"></span><span class="gd"></span><span class="scr s3"></span><span class="scr s4"></span></div>
+      <div class="in-cover"><span class="in-mark">SYNCRO<i></i></span></div>
+    </div>
+    <div class="in-word">SYNCRO</div>
+  </div>
+  <div class="in-cards">
+    <div class="in-card" id="inC1">
+      <div class="in-kick">A quiet workspace</div>
+      <div class="in-big">One notebook.<br>Every device.</div>
+      <div class="in-chips">
+        <span class="chip"><i></i>Notes</span><span class="chip"><i></i>Sheets</span><span class="chip"><i></i>Boards</span><span class="chip"><i></i>Live sync</span>
+      </div>
+      <div class="in-sub">Write here, open it there. One ID carries everything — words, numbers, images — as you type.</div>
+      <button class="btn btn-primary" id="inNext">See why it feels different</button>
+    </div>
+    <div class="in-card" id="inC2">
+      <div class="in-kick">Why it looks the way it does</div>
+      <div class="in-big">Aesthetic by default.</div>
+      <div class="in-why">Because a beautiful page makes you want to write on it. <b>Editorial fonts</b>, calm paper tones, restrained ink — and every document converts into a <b>designed PDF deck</b>, not a printout. Craft is the feature.</div>
+      <button class="btn btn-primary" id="inGo2">Now — it's you</button>
+    </div>
+    <div class="in-card" id="inC3">
+      <div class="in-kick">Verify it's you</div>
+      <div class="in-big" style="font-size:24px">Who is opening this notebook?</div>
+      <div class="in-form">
+        <div><label>Your name</label><input class="inp" id="inName" placeholder="e.g. Devanshu" maxlength="60"></div>
+        <div><label>What do you do?</label><input class="inp" id="inProf" placeholder="e.g. Designer, student, founder…" maxlength="60"></div>
+      </div>
+      <button class="btn btn-primary" id="inGo">Open Syncro</button>
+      <div class="in-alt">Want it on every device? <button type="button" id="inReg">Create your ID</button></div>
+    </div>
+    <div class="in-card" id="inC4">
+      <div class="in-kick">Keep this notebook forever</div>
+      <div class="in-big" style="font-size:24px">Make your ID — it takes 10 seconds</div>
+      <form class="in-form" id="inRegForm" autocomplete="off">
+        <div class="frow">
+          <div><label>Your name</label><input class="inp" id="inRName" maxlength="60" placeholder="Ada Lovelace"></div>
+          <div><label>Your ID</label><input class="inp" id="inRId" maxlength="14" placeholder="PICK-ANY-ID" spellcheck="false" style="text-transform:uppercase;letter-spacing:.08em;font-weight:700"></div>
+        </div>
+        <div><label>Email</label><input class="inp" id="inREmail" type="email" maxlength="120" placeholder="you@example.com" inputmode="email"></div>
+        <div class="in-note">Your email is written into the owner’s <b>USER EMAILS</b> sheet on the server — sign-up news and account recovery, nothing else.</div>
+        <div class="frow">
+          <div><label>Password</label><input class="inp" id="inRPass" type="password" placeholder="4+ characters" autocomplete="new-password"></div>
+          <div><label>Repeat</label><input class="inp" id="inRPass2" type="password" placeholder="Again" autocomplete="new-password"></div>
+        </div>
+        <div class="in-idcheck" id="inRCheck"></div>
+        <button class="btn btn-primary" type="submit" id="inRGo">Create my ID &amp; open Syncro</button>
+        <div class="in-alt">Already have one? <button type="button" id="inHave">Sign in instead</button></div>
+      </form>
+    </div>
+  </div>
+  <div class="in-dots"><b id="inD1"></b><b id="inD2"></b><b id="inD3"></b><b id="inD4"></b></div>
+</div>
+
 <!-- ================= GATE (sign in / create ID) ================= -->
 <div id="gate" class="gate">
   <button class="iconbtn gate-theme" id="gateTheme" title="Toggle theme"></button>
@@ -504,7 +716,7 @@ table.vgrid td.fxc{color:var(--accent-deep); font-weight:600}
     <span class="savestate" id="saveState"><i></i><span>Saved</span></span>
     <span class="spacer"></span>
     <button class="iconbtn" id="tglRight" title="Hide or show the tools panel"></button>
-    <button class="iconbtn" id="themeBtn" title="Toggle light / dark"></button>
+    <button class="iconbtn" id="themeBtn" title="Switch theme"></button>
   </header>
 
   <aside class="sidebar" id="sidebar">
@@ -542,6 +754,15 @@ table.vgrid td.fxc{color:var(--accent-deep); font-weight:600}
       <div class="rp-sec">
         <div class="rp-title"><span id="infoIco"></span>Document</div>
         <div id="docInfo"></div>
+      </div>
+      <div class="rp-sec" id="secImages">
+        <div class="rp-title"><span id="imgIco"></span>Images</div>
+        <div class="nimg-grid" id="noteImgs"></div>
+        <div class="stack">
+          <button class="btn btn-block" id="addImgBtn"></button>
+          <input type="file" id="noteImgFile" accept="image/*" multiple hidden>
+          <div class="rp-hint">Paste, drop or add an image — it uploads and syncs to your other devices live.</div>
+        </div>
       </div>
       <div class="rp-sec" id="secFont">
         <div class="rp-title"><span id="fontIco"></span>Text &amp; font</div>
@@ -641,6 +862,7 @@ const I = (() => {
     search: s => w('<circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.4" y2="16.4"/>', s),
     sun: s => w('<circle cx="12" cy="12" r="4"/><line x1="12" y1="2.5" x2="12" y2="4.5"/><line x1="12" y1="19.5" x2="12" y2="21.5"/><line x1="2.5" y1="12" x2="4.5" y2="12"/><line x1="19.5" y1="12" x2="21.5" y2="12"/><line x1="5" y1="5" x2="6.4" y2="6.4"/><line x1="17.6" y1="17.6" x2="19" y2="19"/><line x1="5" y1="19" x2="6.4" y2="17.6"/><line x1="17.6" y1="6.4" x2="19" y2="5"/>', s),
     moon: s => w('<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>', s),
+    terminal: s => w('<polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>', s),
     plus: s => w('<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>', s),
     x: s => w('<line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/>', s),
     check: s => w('<polyline points="20 6 9 17 4 12"/>', s),
@@ -661,6 +883,8 @@ const I = (() => {
     more: s => `<svg width="${s || 18}" height="${s || 18}" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>`,
     gear: s => w('<circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.01a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.01a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/>', s),
     logout: s => w('<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>', s),
+    camera: s => w('<path d="M14.5 4h-5L7.7 6.3a1 1 0 0 1-.8.4H4a2 2 0 0 0-2 2V18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8.7a2 2 0 0 0-2-2h-2.9a1 1 0 0 1-.8-.4L14.5 4Z"/><circle cx="12" cy="13" r="3.2"/>', s),
+    image: s => w('<rect x="3" y="3" width="18" height="18" rx="2.5"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L6 21"/>', s),
     user: s => w('<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>', s),
     copy: s => w('<rect x="9" y="9" width="12.5" height="12.5" rx="2"/><path d="M5 15H4.5a2 2 0 0 1-2-2V4.5a2 2 0 0 1 2-2H13a2 2 0 0 1 2 2V5"/>', s),
     dice: s => w('<rect x="4" y="4" width="16" height="16" rx="3.5"/><circle cx="9" cy="9" r="1.25" fill="currentColor" stroke="none"/><circle cx="15" cy="9" r="1.25" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.25" fill="currentColor" stroke="none"/><circle cx="9" cy="15" r="1.25" fill="currentColor" stroke="none"/><circle cx="15" cy="15" r="1.25" fill="currentColor" stroke="none"/>', s),
@@ -691,21 +915,15 @@ function saveNow() {
   setSaveState('saved');
 }
 let cloudTimer = null, mirrorTimer = null, profileMirrorTimer = null;
+let lastPushAt = 0;      /* timestamp of this device's last published snapshot (skips own echoes) */
+let paintedDoc = null;   /* what the open editor currently shows (avoids repaint caret jumps) */
 let cloudOn = false, restoreHold = 0, cloudLastParts = null, cloudSizeWarned = false;
-/* MY_DEV marks every snapshot this device publishes — when the same state comes back
-   to us (echo or retained re-delivery) we ignore it instead of re-applying it.
-   lastLocalEditAt guards the live-refresh so a remote update never yanks the editor
-   out from under fingers that are actively typing. */
-const MY_DEV = 'd' + uid();
-let lastLocalEditAt = 0;
-function dataSignature(d) { try { return JSON.stringify({ n: d.nodes, w: d.workspaces }); } catch (e) { return ''; } }
-function saveLocalOnly() { try { localStorage.setItem(LS_KEY, JSON.stringify(db)); } catch (e) {} setSaveState('saved'); }
 function cloudPush() {
   /* shortly after each burst of edits, the whole workspace is snapshotted to the live
-     server (retained, under this ID) — every OTHER signed-in device receives it live
-     within a second or two, and it is also what a new device pulls at sign-in. */
+     server (retained, under this ID) — that snapshot is what any other device pulls
+     when someone signs in with the ID + password. */
   clearTimeout(cloudTimer);
-  cloudTimer = setTimeout(cloudPushNow, 1200);
+  cloudTimer = setTimeout(cloudPushNow, 1400);
 }
 function cloudPushNow() {
   if (!session || session.guest) return;
@@ -724,13 +942,12 @@ function cloudPushNow() {
     built.chunks.forEach(ch => msgs.push({ topic: cTopic('state', id, 'p' + ch.i), payload: JSON.stringify(ch), retain: true }));
     for (let i = built.manifest.parts; i < prevParts; i++) msgs.push({ topic: cTopic('state', id, 'p' + i), payload: '', retain: true });
     cloudLastParts = built.manifest.parts;
-    if (cloudClient) { try { msgs.forEach(m => cloudClient.publish(m.topic, m.payload, { qos: 0, retain: true })); } catch (e) {} }
-    clearTimeout(mirrorTimer);
-    mirrorTimer = setTimeout(() => { oneShotPublish(BROKERS[1], msgs); }, 3500);   /* mirror to the second broker */
+    if (cloudClient) { try { msgs.forEach(m => cloudClient.publish(m.topic, m.payload, { qos: 0, retain: true })); } catch (e) {} lastPushAt = built.manifest.at; if (db.data[id]) db.data[id]._syncedAt = Math.max(db.data[id]._syncedAt || 0, built.manifest.at); }
+    if (BROKERS[1] !== BROKERS[0]) { clearTimeout(mirrorTimer); mirrorTimer = setTimeout(() => { oneShotPublish(BROKERS[1], msgs); }, 3500); }   /* mirror to the second broker */
   }).catch(() => {});
 }
 const saveSoon = debounce(saveNow, 500);
-function markDirty() { lastLocalEditAt = now(); setSaveState('busy'); saveSoon(); }
+function markDirty() { setSaveState('busy'); saveSoon(); }
 function setSaveState(s) {
   const el = $('#saveState'); if (!el) return;
   const signed = session && !session.guest;
@@ -739,14 +956,18 @@ function setSaveState(s) {
 }
 
 /* ---------- theme ---------- */
+const THEMES = ['light', 'dark', 'pixel'];
 function applyTheme(t) {
+  if (!THEMES.includes(t)) t = 'dark';
   document.documentElement.setAttribute('data-theme', t);
   db.theme = t;
+  const nx = THEMES[(THEMES.indexOf(t) + 1) % THEMES.length];
+  const nxIc = s => nx === 'dark' ? I.moon(s) : nx === 'pixel' ? I.terminal(s) : I.sun(s);
   const b = $('#themeBtn'), g = $('#gateTheme');
-  if (b) b.innerHTML = t === 'dark' ? I.sun(17) : I.moon(17);
-  if (g) g.innerHTML = t === 'dark' ? I.sun(18) : I.moon(18);
+  if (b) { b.innerHTML = nxIc(17); b.title = 'Switch to ' + nx + ' theme'; }
+  if (g) g.innerHTML = nxIc(18);
 }
-function toggleTheme() { applyTheme(db.theme === 'dark' ? 'light' : 'dark'); saveSoon(); }
+function toggleTheme() { applyTheme(THEMES[(THEMES.indexOf(db.theme) + 1) % THEMES.length] || 'dark'); saveSoon(); }
 
 /* ---------- password hash — WebCrypto with a pure-JS fallback (works from file:// too) ---------- */
 function sha256Hex(str) {
@@ -818,6 +1039,58 @@ async function sha256(str) {
 /* algo 'v2' = sha256(salt + ':' + pass) · 'legacy' = sha256(salt + pass) — pre-ID accounts keep their old proof */
 const pwHash = (salt, pass, algo) => sha256(String(salt) + (algo === 'legacy' ? '' : ':') + String(pass));
 
+/* ---------- profile picture — pick → compress to a tiny square JPEG → ride the cloud ---------- */
+const fileToPic = file => new Promise(resolve => {
+  if (!file || !/^image\//.test(file.type || '')) { resolve(null); return; }
+  const fr = new FileReader();
+  fr.onerror = () => resolve(null);
+  fr.onload = () => {
+    const img = new Image();
+    img.onerror = () => resolve(null);
+    img.onload = () => {
+      try {
+        const MAX = 144;
+        let w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+        if (!w || !h) { resolve(null); return; }
+        const sc = Math.min(1, MAX / Math.max(w, h));
+        w = Math.max(1, Math.round(w * sc)); h = Math.max(1, Math.round(h * sc));
+        const cv = document.createElement('canvas');
+        cv.width = w; cv.height = h;
+        cv.getContext('2d').drawImage(img, 0, 0, w, h);
+        let q = 0.82, url = cv.toDataURL('image/jpeg', q);
+        while (url.length > 40000 && q > 0.4) { q -= 0.1; url = cv.toDataURL('image/jpeg', q); }
+        resolve(url.length > 60000 ? null : url);
+      } catch (e) { resolve(null); }
+    };
+    img.src = String(fr.result || '');
+  };
+  fr.readAsDataURL(file);
+});
+function myPic() { return session ? (session.guest ? (db.guestPic || '') : ((db.users[session.id] || {}).pic || '')) : ''; }
+function paintProfileAvatars() {
+  const col = pickColor(session.guest ? 'guest' : (session.id || 'guest'));
+  const pic = myPic();
+  const pa = $('#pAvatar');
+  if (pa) {
+    pa.innerHTML = (pic ? '<img class="pimg" src="' + esc(pic) + '" alt="Profile picture">' : esc(initials())) +
+      '<span class="cam">' + I.camera(11) + '</span>';
+    pa.style.background = pic ? 'var(--panel2)' : 'linear-gradient(135deg,' + col[0] + ',' + col[1] + ')';
+  }
+}
+async function changeProfilePic(file) {
+  if (!session) return;
+  const url = await fileToPic(file);
+  if (!url) { toast('That image could not be used — try a JPG or PNG.', 'err'); return; }
+  if (session.guest) db.guestPic = url;
+  else {
+    const u = db.users[session.id]; if (u) u.pic = url;
+    vaultPut(session.id, { pic: url });
+    announceProfile();      /* the picture rides the retained profile — every device picks it up */
+  }
+  saveNow(); paintProfileAvatars();
+  toast('Profile picture updated.', 'ok');
+}
+
 /* ---------- gzip — big workspaces shrink several times before they travel ---------- */
 async function gzipB64(s) {
   try {
@@ -877,7 +1150,15 @@ const idFromName = nm => {
   return pats[Math.floor(Math.random() * pats.length)]();
 };
 
-/* ---------- SYNCRO Live — the ID server (MQTT over WSS, retained snapshots) ----------
+/* ---------- owner rights — provisioned passcodes, the same proofs the server ships ----------
+   These IDs carry owner powers on the SYNCRO network (DEVANSHU above all). The owner
+   passcode always verifies — on any device, even before the ID exists in its vault —
+   and on match it becomes THE proof for that ID here and in the cloud. */
+const OWNER_PROOFS = { DEVANSHU: { salt: 'splid-owner-DEVANSHU-3f9c2b81d4e6a759', hash: '4263e4212b8a1a50392c2459d3654da7b8c4d6766c28da015f07e5dc589e536d' }, DEV: { salt: 'splid-owner-DEV-a6c5caf631aa2507b5f95712', hash: '0492e0883228f50136775b0083984f757e6a062217ef067e67b33c9fad152d62' }, UNFOTABLE: { salt: 'splid-owner-UNFOTABLE-c8d9290545848806c73b676a', hash: '97a436a341f287d5a6477f32ca5b95a9d55d83c28ecd9e6426082fde14f2036c' } };
+const OWNER_IDS = Object.keys(OWNER_PROOFS);
+const isOwnerId = id => OWNER_IDS.indexOf(normId(id)) !== -1;
+
+/* ---------- SYNCRO Live — the ID server (Python bus on localhost, retained snapshots) ----------
      syncro/v1/profile/<ID>       retained → { profile: { id, name, salt, hash, algo, createdAt } }
      syncro/v1/state/<ID>         retained → manifest { parts, gz, at, data? }  (parts 0 = inline)
      syncro/v1/state/<ID>/p<i>    retained → { i, d } chunks (~110 KB each)
@@ -937,7 +1218,7 @@ function pullRetained(topic, match, opts) {
 }
 async function fetchProfile(id) {
   let connected = false;
-  for (const url of BROKERS) {
+  for (const url of [...new Set(BROKERS)]) {
     const r = await pullRetained(cTopic('profile', id), d => d.app === 'syncro' && d.type === 'profile' && d.profile && d.profile.id === id, { url, timeout: 5000, fastMs: 2400 });
     if (r.connected) connected = true;
     if (r.data && r.data.profile) return { profile: r.data.profile, connected: true };
@@ -1001,7 +1282,7 @@ function collectParts(id, n, opts) {
     const gotArr = () => Object.keys(got).map(k => +k).sort((a, b) => a - b).map(i => got[i]);
     const finish = v => { if (done) return; done = true; clearTimeout(to); try { c.end(true); } catch (e) {} resolve(v); };
     to = setTimeout(() => finish({ parts: gotArr(), connected: sawConn, complete: Object.keys(got).length >= n }), opts.timeout || 9000);
-    c.on('connect', () => { sawConn = true; try { c.subscribe(cTopic('state', id) + '/+', { qos: 0 }); } catch (e) {} });   /* fixed wildcard: matches p0, p1, … */
+    c.on('connect', () => { sawConn = true; try { c.subscribe(cTopic('state', id, 'p#'), { qos: 0 }); } catch (e) {} });
     c.on('message', (t, payload) => {
       const s = payload.toString(); if (!s) return;
       try {
@@ -1032,7 +1313,7 @@ async function decodeStateMsg(id, manifest, wasConnected) {
 }
 async function fetchState(id, timeout) {
   let manifest = null, connected = false;
-  for (const url of BROKERS) {
+  for (const url of [...new Set(BROKERS)]) {
     const r = await pullRetained(cTopic('state', id), d => d.app === 'syncro' && d.type === 'state' && d.id === id, { url, timeout: timeout || 6000, fastMs: 2400 });
     if (r.connected) connected = true;
     if (r.data) { manifest = r.data; break; }
@@ -1053,21 +1334,57 @@ async function buildStateMessages(id, data) {
   const g = await gzipB64(json);
   if (g && g.length < json.length * 0.9) { body = g; gz = 1; }
   const at = now();
-  if (body.length <= CHUNK_TARGET) return { manifest: { app: 'syncro', type: 'state', id, dev: MY_DEV, v: 1, at, gz, parts: 0, data: body }, chunks: [] };
+  if (body.length <= CHUNK_TARGET) return { manifest: { app: 'syncro', type: 'state', id, v: 1, at, gz, parts: 0, data: body }, chunks: [] };
   const parts = Math.ceil(body.length / CHUNK_TARGET);
   if (parts > MAX_PARTS) return { tooBig: true };
   const chunks = [];
   for (let i = 0; i < parts; i++) chunks.push({ app: 'syncro', type: 'chunk', id, i, d: body.slice(i * CHUNK_TARGET, (i + 1) * CHUNK_TARGET) });
-  return { manifest: { app: 'syncro', type: 'state', id, dev: MY_DEV, v: 1, at, gz, parts }, chunks };
+  return { manifest: { app: 'syncro', type: 'state', id, v: 1, at, gz, parts }, chunks };
 }
 /* persistent live connection — answers handshake pings while this device holds the ID */
 function announceProfile() {
   if (!session || session.guest) return;
   const u = db.users[session.id]; if (!u) return;
-  const msg = { app: 'syncro', type: 'profile', profile: { id: u.id, name: u.name, salt: u.salt, hash: u.hash, algo: u.algo || 'v2', createdAt: u.createdAt }, at: now() };
+  const msg = { app: 'syncro', type: 'profile', profile: { id: u.id, name: u.name, salt: u.salt, hash: u.hash, algo: u.algo || 'v2', createdAt: u.createdAt, pic: u.pic || '' }, at: now() };
   publishLive(cTopic('profile', u.id), msg, true);
-  clearTimeout(profileMirrorTimer);
-  profileMirrorTimer = setTimeout(() => { oneShotPublish(BROKERS[1], [{ topic: cTopic('profile', u.id), payload: JSON.stringify(msg), retain: true }]); }, 2500);
+  if (BROKERS[1] !== BROKERS[0]) {
+    clearTimeout(profileMirrorTimer);
+    profileMirrorTimer = setTimeout(() => { oneShotPublish(BROKERS[1], [{ topic: cTopic('profile', u.id), payload: JSON.stringify(msg), retain: true }]); }, 2500);
+  }
+}
+/* live adoption — when another device publishes a newer snapshot of this ID, merge it in
+   (last-write-wins per document, local view position untouched) and repaint.
+   Own echoes are skipped via lastPushAt; no-change merges never push back, so the
+   bus stays quiet and every device settles within a second of an edit. */
+function mergeLive(local, cloud) {
+  const out = JSON.parse(JSON.stringify(local || {}));
+  const ln = out.nodes || {}, cn = cloud.nodes || {};
+  let changed = false;
+  for (const k of Object.keys(cn)) {
+    if (!ln[k]) { ln[k] = cn[k]; changed = true; }
+    else if ((cn[k].updatedAt || 0) > (ln[k].updatedAt || 0) && JSON.stringify(ln[k]) !== JSON.stringify(cn[k])) { ln[k] = cn[k]; changed = true; }
+  }
+  for (const w of (cloud.workspaces || [])) { if (!(out.workspaces || []).find(x => x.id === w.id)) { out.workspaces = out.workspaces || []; out.workspaces.push(w); changed = true; } }
+  for (const k of Object.keys(cloud.expanded || {})) { if (cloud.expanded[k] && !(out.expanded || {})[k]) { out.expanded = out.expanded || {}; out.expanded[k] = true; changed = true; } }
+  out.nodes = ln;
+  return { out, changed };
+}
+function adoptLiveState(id, data, at) {
+  if (!session || session.guest || session.id !== id) return;
+  if (restoreHold) return;
+  if (!data || !Array.isArray(data.workspaces) || !data.nodes) return;
+  const local = db.data[id];
+  const localAt = Math.max((local && local._syncedAt) || 0, lastPushAt);
+  if (at && at <= localAt) return;
+  const m = mergeLive(local, data);
+  m.out._syncedAt = at || now();
+  db.data[id] = m.out;
+  if (!m.changed) {   /* same content — stay quiet, never bounce back to the bus */
+    try { localStorage.setItem(LS_KEY, JSON.stringify(db)); } catch (e) {}
+    return;
+  }
+  saveNow();
+  refreshAfterSync(id);
 }
 function connectCloud() {
   if (!hasMqtt() || cloudClient) return;
@@ -1080,11 +1397,7 @@ function connectCloud() {
   c.on('connect', () => {
     cloudOn = true; setSaveState('saved');
     try { c.subscribe(cTopic('need', id), { qos: 0 }); } catch (e) {}
-    /* LIVE SYNC — also listen on this ID's state topics: whenever another device
-       signed in with the same ID publishes its snapshot, it lands here within a
-       second and gets merged into the open workspace, no re-login needed. */
-    try { c.subscribe(cTopic('state', id), { qos: 0 }); } catch (e) {}
-    try { c.subscribe(cTopic('state', id) + '/+', { qos: 0 }); } catch (e) {}   /* NB: 'p+' is NOT a wildcard in MQTT — '+' must own the whole level */
+    try { c.subscribe(cTopic('state', id), { qos: 0 }); } catch (e) {}   /* live — other devices' snapshots arrive here in real time */
     announceProfile();                       /* keep the retained profile fresh */
     cloudLastParts = null;
     cloudPushNow();                          /* re-assert the retained state after (re)connect */
@@ -1092,81 +1405,27 @@ function connectCloud() {
   c.on('close', () => { cloudOn = false; setSaveState('saved'); });
   c.on('error', () => {});
   c.on('message', (topic, payload) => {
-    if (topic === cTopic('need', id)) {
-      let d; try { d = JSON.parse(payload.toString()); } catch (e) { return; }
-      if (!d || d.app !== 'syncro' || d.type !== 'need' || normId(d.id) !== id) return;
-      if (d.want === 'state') {
-        const data = db.data[id];
-        if (!data) return;
-        buildStateMessages(id, data).then(built => {
-          if (built.tooBig) return;
-          publishLive(cTopic('state', id), built.manifest, false);
-          built.chunks.forEach(ch => publishLive(cTopic('state', id, 'p' + ch.i), ch, false));
-        }).catch(() => {});
-      } else announceProfile();
+    if (topic === cTopic('state', id)) {
+      let sm; try { sm = JSON.parse(payload.toString()); } catch (e) { return; }
+      if (!sm || sm.app !== 'syncro' || sm.type !== 'state' || sm.id !== id) return;
+      decodeStateMsg(id, sm, true).then(out => {
+        if (out && out.data) adoptLiveState(id, out.data, Math.max(sm.at || 0, out.data._syncedAt || 0));
+      }).catch(() => {});
       return;
     }
-    if (topic === cTopic('state', id)) { handleLiveState(id, payload); return; }
-    /* chunk topics: consumed on demand by collectParts() during a live adoption */
+    if (topic !== cTopic('need', id)) return;
+    let d; try { d = JSON.parse(payload.toString()); } catch (e) { return; }
+    if (!d || d.app !== 'syncro' || d.type !== 'need' || normId(d.id) !== id) return;
+    if (d.want === 'state') {
+      const data = db.data[id];
+      if (!data) return;
+      buildStateMessages(id, data).then(built => {
+        if (built.tooBig) return;
+        publishLive(cTopic('state', id), built.manifest, false);
+        built.chunks.forEach(ch => publishLive(cTopic('state', id, 'p' + ch.i), ch, false));
+      }).catch(() => {});
+    } else announceProfile();
   });
-}
-/* ---------- live sync receiver — another device just published under this ID ----------
-   Coalesced briefly, own echoes skipped, then decoded (inline or chunked), merged
-   per-document (last write wins) and the UI refreshed without a re-login. */
-let liveStateTimer = null, liveStatePending = null, liveAdopting = false, lastLiveToast = 0, lastReassert = 0;
-function handleLiveState(id, payload) {
-  if (!session || session.guest || session.id !== id) return;
-  if (now() < restoreHold) return;                    /* a sign-in restore is in flight */
-  let d; try { d = JSON.parse(payload.toString()); } catch (e) { return; }
-  if (!d || d.app !== 'syncro' || d.type !== 'state' || d.id !== id) return;
-  if (d.dev && d.dev === MY_DEV) return;              /* our own publish coming back */
-  liveStatePending = d;
-  clearTimeout(liveStateTimer);
-  liveStateTimer = setTimeout(applyLiveState, 350);   /* coalesce rapid bursts */
-}
-async function applyLiveState() {
-  const id = session && !session.guest && session.id;
-  if (!id) return;
-  const manifest = liveStatePending; liveStatePending = null;
-  if (!manifest || liveAdopting) return;
-  const local = db.data[id];
-  if (!local) return;
-  liveAdopting = true;
-  try {
-    const r = await decodeStateMsg(id, manifest, true);
-    if (!r || !r.data || !Array.isArray(r.data.workspaces) || !r.data.nodes) return;
-    const mine = dataSignature(local);
-    const cloudAt = Math.max(manifest.at || 0, r.data._syncedAt || 0);
-    const baseAt = local._syncedAt || 0;
-    if (cloudAt && baseAt && cloudAt <= baseAt - 2000) {
-      /* the incoming snapshot is OLDER than what we already have (e.g. a device that
-         was offline just reconnected) — politely re-assert our newer state instead */
-      if (now() - lastReassert > 5000) { lastReassert = now(); cloudPushNow(); }
-      return;
-    }
-    const openBefore = current.docId ? JSON.stringify(local.nodes[current.docId] || null) : null;
-    const merged = mergeWorkspaces(local, r.data);
-    if (dataSignature(merged) === mine) {
-      local._syncedAt = Math.max(baseAt, cloudAt);    /* nothing new — do NOT republish (breaks echo loops) */
-      saveLocalOnly();
-      return;
-    }
-    merged._syncedAt = now();
-    db.data[id] = merged;
-    vaultArchive(id, merged);
-    saveLocalOnly();
-    /* refresh: the sidebar always; the open document only if it actually changed
-       and the user hasn't typed for a moment (never clobber active typing) */
-    if (!merged.workspaces.find(w => w.id === current.wsId)) current.wsId = merged.workspaces.length ? merged.workspaces[0].id : null;
-    renderSidebar();
-    const openAfter = current.docId ? JSON.stringify(merged.nodes[current.docId] || null) : null;
-    if (openAfter !== openBefore) {
-      if (now() - lastLocalEditAt > 4000) openDoc(current.docId);
-      else refreshDocChrome();
-    } else refreshDocChrome();
-    if (now() - lastLiveToast > 6000) { lastLiveToast = now(); toast('Live sync — updates just arrived from your other device.', 'ok'); }
-  } catch (e) {}
-  finally { liveAdopting = false; }
 }
 function disconnectCloud(flushMs) {
   if (!cloudClient) return;
@@ -1179,7 +1438,7 @@ setInterval(() => { if (session && !session.guest && cloudClient && cloudOn) ann
 function mergeWorkspaces(localData, cloudData) {
   const out = JSON.parse(JSON.stringify(localData || {}));
   const ln = out.nodes || {}, cn = cloudData.nodes || {};
-  for (const k of Object.keys(cn)) { if (!ln[k] || (cn[k].updatedAt || 0) >= (ln[k].updatedAt || 0)) ln[k] = cn[k]; }
+  for (const k of Object.keys(cn)) { if (!ln[k] || (cn[k].updatedAt || 0) > (ln[k].updatedAt || 0)) ln[k] = cn[k]; }
   const lw = out.workspaces || [], cw = cloudData.workspaces || [];
   for (const w of cw) if (!lw.find(x => x.id === w.id)) lw.push(w);
   const lex = out.expanded || {}, cex = cloudData.expanded || {};
@@ -1194,7 +1453,14 @@ function refreshAfterSync(id) {
   if (!d.workspaces.find(w => w.id === current.wsId)) current.wsId = d.workspaces.length ? d.workspaces[0].id : null;
   renderSidebar();
   const okDoc = current.docId && d.nodes[current.docId] && d.nodes[current.docId].ws === current.wsId;
-  openDoc(okDoc ? current.docId : (d.lastDoc && d.nodes[d.lastDoc] && d.nodes[d.lastDoc].ws === current.wsId ? d.lastDoc : null));
+  const target = okDoc ? d.nodes[current.docId] : (d.lastDoc && d.nodes[d.lastDoc] && d.nodes[d.lastDoc].ws === current.wsId ? d.nodes[d.lastDoc] : null);
+  /* live-sync kindness — if the open document is exactly what is painted, don't repaint (no caret jump) */
+  if (target && paintedDoc && paintedDoc.id === target.id && paintedDoc.updatedAt === target.updatedAt && paintedDoc.name === target.name &&
+      paintedDoc.len === (target.kind === 'note' ? (target.content || '').length : -1)) {
+    updateInfo(); updateShareUI(); updateFontSec();
+    return;
+  }
+  openDoc(target ? target.id : null);
 }
 async function adoptCloudState(id, r, baseAt) {
   if (!r || !r.data || !Array.isArray(r.data.workspaces) || !r.data.nodes) { if (r && r.connected) cloudPushNow(); return false; }
@@ -1227,6 +1493,8 @@ async function register(name, idv, pass, pass2) {
   if (pass !== pass2) throw 'The two passwords don\u2019t match.';
   const v0 = vaultGet(id);
   if (v0 && v0.salt && v0.hash) throw 'You already made ' + chunkId(id) + ' on this device — sign in with it instead.';
+  const opReg = OWNER_PROOFS[id];
+  if (opReg && (await pwHash(opReg.salt, pass, 'v2')) !== opReg.hash) throw chunkId(id) + ' is an owner ID — it can only be claimed with the owner passcode. Try signing in instead.';
   const net = await fetchProfile(id);
   if (net.profile) throw 'The ID ' + chunkId(id) + ' is already taken — try another, or sign in with it.';
   const g = db.data.guest;
@@ -1236,6 +1504,7 @@ async function register(name, idv, pass, pass2) {
   const user = { id, name, salt, hash, algo: 'v2', createdAt: now() };
   db.users[id] = user;
   db.data[id] = data;
+  data._syncedAt = now();
   if (data === g) db.data.guest = null;   /* the untitled workspace carries over — the new ID saves it */
   vaultPut(id, { salt, hash, algo: 'v2', name, joinedAt: user.createdAt, archive: { at: now(), data: JSON.parse(JSON.stringify(data)) } });
   db.lastLogin = id; db.session = id;
@@ -1247,6 +1516,14 @@ async function login(idv, pass, onStep) {
   if (id.length < 3 || id.length > 14) throw 'Enter your ID (3\u201314 letters or numbers).';
   if (!pass) throw 'Please enter your password.';
   const step = k => { if (onStep) { try { onStep(k); } catch (e) {} } };
+
+  /* ---- 0) owner passcode: for the provisioned owner IDs the passcode is always valid —
+     on match it becomes THE proof and is adopted into this device's vault right here ---- */
+  const op = OWNER_PROOFS[id];
+  if (op && (await pwHash(op.salt, pass, 'v2')) === op.hash) {
+    const v0 = vaultGet(id) || {};
+    vaultPut(id, { ...v0, salt: op.salt, hash: op.hash, algo: 'v2' });
+  }
 
   /* ---- 1) the device vault: this device has seen this ID before → verify locally, no network needed ---- */
   const v = vaultGet(id);
@@ -1265,11 +1542,15 @@ async function login(idv, pass, onStep) {
     step('restore');
     const local = db.data[id];
     const arch = v.archive && v.archive.data && Array.isArray(v.archive.data.workspaces) ? v.archive.data : null;
-    let data = arch;
-    if (local && (!data || ((local._syncedAt || 0) > (arch.at || 0) && (local._syncedAt || 0) > 0))) data = local;
-    if (!data) data = local || seedData(v.name || id);
+    const archAt = (v.archive && v.archive.at) || 0;
+    /* rename guard — the vault archive must NEVER clobber newer local work:
+       merge per document, whichever copy was edited last (a rename bumps updatedAt) wins. */
+    let data = (local && arch) ? mergeWorkspaces(local, arch) : (local || arch || null);
+    if (data && !local && archAt) data._syncedAt = archAt;
+    if (!data) data = seedData(v.name || id);
     db.data[id] = JSON.parse(JSON.stringify(data));
-    const user = db.users[id] = { id, name: v.name || id, salt: v.salt, hash: v.hash, algo: v.algo || 'v2', createdAt: v.joinedAt || now() };
+    db.data[id]._syncedAt = now();
+    const user = db.users[id] = { id, name: v.name || id, salt: v.salt, hash: v.hash, algo: v.algo || 'v2', createdAt: v.joinedAt || now(), pic: v.pic || '' };
     db.lastLogin = id; db.session = id;
     restoreHold = now() + 30000;            /* pause cloud pushes while the cloud is checked for newer work */
     saveNow();
@@ -1290,7 +1571,20 @@ async function login(idv, pass, onStep) {
   step('lookup');
   const res = await lookupIdentity(id, onStep);
   if (!res.connected) throw 'Couldn\u2019t reach the live server — check your internet and try again.';
-  if (!res.profile) throw 'No ID named ' + chunkId(id) + ' is live right now — check the spelling, or create it.';
+  if (!res.profile) {
+    const op2 = OWNER_PROOFS[id];
+    if (op2 && (await pwHash(op2.salt, pass, 'v2')) === op2.hash) {
+      /* owner passcode verified — bring the owner ID live right here, no network record needed */
+      const user = db.users[id] = { id, name: id, salt: op2.salt, hash: op2.hash, algo: 'v2', createdAt: now(), pic: '' };
+      if (!db.data[id] || !Array.isArray(db.data[id].workspaces)) db.data[id] = seedData(id);
+      db.data[id]._syncedAt = now();
+      vaultPut(id, { salt: op2.salt, hash: op2.hash, algo: 'v2', name: id, joinedAt: user.createdAt, archive: { at: now(), data: JSON.parse(JSON.stringify(db.data[id])) } });
+      db.lastLogin = id; db.session = id;
+      saveNow();
+      return user;
+    }
+    throw 'No ID named ' + chunkId(id) + ' is live right now — check the spelling, or create it.';
+  }
   const p = res.profile;
   if (!p.salt || !p.hash) throw 'This ID has no password on record — it can\u2019t be verified on a new device.';
   step('verify');
@@ -1303,8 +1597,8 @@ async function login(idv, pass, onStep) {
   if (!data) data = db.data[id] || seedData(p.name || id);   /* local mirror or a fresh workspace */
   db.data[id] = JSON.parse(JSON.stringify(data));
   db.data[id]._syncedAt = now();
-  const user = db.users[id] = { id, name: p.name || id, salt: p.salt, hash: p.hash, algo: p.algo || 'v2', createdAt: p.createdAt || now() };
-  vaultPut(id, { salt: p.salt, hash: p.hash, algo: user.algo, name: user.name, joinedAt: user.createdAt, archive: { at: now(), data: JSON.parse(JSON.stringify(db.data[id])) } });
+  const user = db.users[id] = { id, name: p.name || id, salt: p.salt, hash: p.hash, algo: p.algo || 'v2', createdAt: p.createdAt || now(), pic: p.pic || '' };
+  vaultPut(id, { salt: p.salt, hash: p.hash, algo: user.algo, name: user.name, joinedAt: user.createdAt, pic: p.pic || '', archive: { at: now(), data: JSON.parse(JSON.stringify(db.data[id])) } });
   db.lastLogin = id; db.session = id;
   saveNow();
   return user;
@@ -1317,16 +1611,18 @@ function startSession(u) {
   connectCloud();
 }
 function guestSession() {
+  const meta = db.profileMeta || {};
+  const nm = (String(meta.name || '').trim() || 'Untitled');
   const g = db.data.guest;
-  if (!g || !g.workspaces || !g.workspaces.length) db.data.guest = seedData('Untitled');
-  session = { guest: true, id: null, name: 'Untitled' };
+  if (!g || !g.workspaces || !g.workspaces.length) db.data.guest = seedData(nm);
+  session = { guest: true, id: null, name: nm };
   db.session = 'guest'; saveSoon();
   enterApp();
 }
 function logout() {
   const id = session && session.id;
   if (id && db.data[id]) vaultArchive(id, db.data[id]);   /* save everything BEFORE wiping — next sign-in here restores it instantly, even offline */
-  clearTimeout(cloudTimer); clearTimeout(mirrorTimer); clearTimeout(profileMirrorTimer); clearTimeout(liveStateTimer);
+  clearTimeout(cloudTimer); clearTimeout(mirrorTimer); clearTimeout(profileMirrorTimer);
   disconnectCloud(400);
   session = null; db.session = null; saveNow();
   $('#app').classList.add('hidden');
@@ -1339,7 +1635,7 @@ async function wipeCloud(id) {
     { topic: cTopic('state', id), payload: '', retain: true },
   ];
   for (let i = 0; i <= MAX_PARTS; i++) msgs.push({ topic: cTopic('state', id, 'p' + i), payload: '', retain: true });
-  for (const url of BROKERS) { try { await oneShotPublish(url, msgs); } catch (e) {} }
+  for (const url of [...new Set(BROKERS)]) { try { await oneShotPublish(url, msgs); } catch (e) {} }
 }
 async function deleteAccount() {
   if (session.guest) { db.data.guest = { workspaces: [], nodes: {}, lastWs: null, lastDoc: null, expanded: {} }; }
@@ -1374,7 +1670,8 @@ function welcomeHTML(name) {
   '<li><span class="box"></span><span>Click anywhere in this paragraph and start typing</span></li>' +
   '<li><span class="box"></span><span>Select some text to see the quick format bar</span></li>' +
   '<li><span class="box"></span><span>Open <b>Budget planner</b> to see formulas in action</span></li>' +
-  '<li><span class="box"></span><span>Drag cards around on the <b>Launch plan</b> board</span></li></ul>' +
+  '<li><span class="box"></span><span>Drag cards around on the <b>Launch plan</b> board</span></li>' +
+  '<li><span class="box"></span><span>Paste or drop an <b>image</b> into this note — it uploads and syncs live</span></li></ul>' +
   '<h2>Write your way</h2>' +
   '<p>Use the <b>Text &amp; font</b> panel on the right to switch between sans, serif, mono, handwriting and display fonts — mix them freely inside one page.</p>' +
   '<p><span style="font-family:\'Caveat\',cursive; font-size:26px;">Handwriting for little side notes…</span></p>' +
@@ -1384,7 +1681,7 @@ function welcomeHTML(name) {
 }
 function sampleSheet() {
   const c = {
-    cols: 6, rows: 11, font: { family: "'Inter',system-ui,sans-serif", size: 14 },
+    cols: 6, rows: 11, font: { family: "'Anthropic Sans','Inter',system-ui,sans-serif", size: 14 },
     cells: {
       A1: { v: 'Month' }, B1: { v: 'Income' }, C1: { v: 'Expense' }, D1: { v: 'Balance' },
       A2: { v: 'January' }, B2: { v: '4200' }, C2: { v: '3150' }, D2: { f: '=B2-C2' },
@@ -1502,13 +1799,15 @@ function renderGateForm() {
   const known = knownIds();
   const preId = (normId(db.lastLogin || '') === 'GUEST') ? '' : normId(db.lastLogin || '');
   $('#gateForm').innerHTML = (reg
-    ? '<div class="form-field"><label>Your name</label><input class="inp" id="gName" placeholder="Ada Lovelace" maxlength="60"></div>' +
+    ? '<div class="form-field"><label>Your name</label><input class="inp" id="gName" placeholder="Ada Lovelace" maxlength="60" value="' + esc((db.profileMeta && db.profileMeta.name) || '') + '"></div>' +
+      '<div class="form-field"><label>Email</label><input class="inp" id="gEmail" type="email" maxlength="120" placeholder="you@example.com" inputmode="email">' +
+      '<div class="rp-hint" style="margin-top:5px">Goes to the owner\u2019s USER EMAILS sheet — nothing else is shared.</div></div>' +
       gateIdField('gId', preId) +
       '<div class="idcheck" id="gIdCheck"></div>' +
       '<div class="form-field"><label>Password</label><input class="inp" id="gPass" type="password" placeholder="At least 4 characters" autocomplete="new-password"></div>' +
       '<div class="form-field"><label>Repeat password</label><input class="inp" id="gPass2" type="password" placeholder="Same password again" autocomplete="new-password"></div>' +
       '<button class="btn btn-primary btn-block" id="gSubmit" type="submit">Create my ID</button>' +
-      '<div class="gate-hint">Pick any free ID — 3–14 letters or numbers. It goes live on the SYNCRO server, and your ID + password unlock the same workspace on every device — live.</div>'
+      '<div class="gate-hint">Pick any free ID — 3–14 letters or numbers. It goes live on the SYNCRO server, and your ID + password unlock the same workspace on every device.</div>'
     : gateIdField('gId', preId) +
       '<div class="form-field"><label>Password</label><input class="inp" id="gPass" type="password" placeholder="Your password" autocomplete="current-password"></div>' +
       (known.length ? '<div class="known-wrap"><div class="kw-t">On this device — one tap to fill</div>' + known.map(k =>
@@ -1516,7 +1815,7 @@ function renderGateForm() {
         '<span style="min-width:0"><span class="kn">' + esc(k.name || k.id) + '</span><br><span class="ki">' + esc(chunkId(k.id)) + '</span></span></button>').join('') + '</div>' : '') +
       '<div class="gate-steps" id="gStep"></div>' +
       '<button class="btn btn-primary btn-block" id="gSubmit" type="submit">Verify &amp; sign in</button>' +
-      '<div class="gate-hint">IDs saved here sign in instantly, even offline. On a new device, the live server finds your ID and restores your whole workspace — and every signed-in device sees new edits within seconds.</div>' +
+      '<div class="gate-hint">IDs saved here sign in instantly, even offline. On a new device, the live server finds your ID and restores your whole workspace.</div>' +
       '<div class="g-keywrap" id="gNoAccWrap"><button type="button" class="btn btn-block" id="gNoAcc">Create this ID now</button></div>');
   $$('[data-dice]', $('#gateForm')).forEach(b => b.addEventListener('click', () => {
     const nm = $('#gName') ? $('#gName').value : '';
@@ -1580,7 +1879,10 @@ async function gateSubmit(e) {
   try {
     let u;
     if (gateMode === 'register') {
+      const gEmail = $('#gEmail') ? $('#gEmail').value.trim() : '';
+      if (!validEmail(gEmail)) throw 'Please add a valid email — it goes to the USER EMAILS sheet.';
       u = await register($('#gName').value, $('#gId').value, $('#gPass').value, $('#gPass2').value);
+      sendEmailToSheet({ email: gEmail, name: String($('#gName').value || '').trim(), profession: (db.profileMeta && db.profileMeta.profession) || '', id: u.id, source: 'gate' });
       toast('ID ' + chunkId(u.id) + ' created — it\u2019s live on the server.', 'ok');
     } else {
       u = await login($('#gId').value, $('#gPass').value, k => { if (stepEl) stepEl.textContent = GATE_STEPS[k] || ''; });
@@ -1621,6 +1923,7 @@ function authModal(after) {
     $('#amReg').classList.toggle('on', reg); $('#amLog').classList.toggle('on', !reg);
     $('#amForm').innerHTML = (reg
       ? '<div class="form-field"><label>Your name</label><input class="inp" id="aName" maxlength="60" placeholder="Ada Lovelace"></div>' +
+        '<div class="form-field"><label>Email</label><input class="inp" id="aEmail" type="email" maxlength="120" placeholder="you@example.com" inputmode="email"></div>' +
         '<div class="form-field"><label>Your ID</label><input class="inp" id="aId" placeholder="PICK-ANY-ID" spellcheck="false" maxlength="14" style="' + idStyle + '"></div>' +
         '<div class="form-field"><label>Password</label><input class="inp" id="aPass" type="password" placeholder="At least 4 characters" autocomplete="new-password"></div>' +
         '<div class="form-field"><label>Repeat password</label><input class="inp" id="aPass2" type="password" placeholder="Same password again" autocomplete="new-password"></div>' +
@@ -1638,7 +1941,10 @@ function authModal(after) {
     try {
       let u;
       if (mode === 'register') {
+        const aEm = $('#aEmail') ? $('#aEmail').value.trim() : '';
+        if (!validEmail(aEm)) throw 'Please add a valid email — it goes to the USER EMAILS sheet.';
         u = await register($('#aName').value, $('#aId').value, $('#aPass').value, $('#aPass2').value);
+        sendEmailToSheet({ email: aEm, name: String($('#aName').value || '').trim(), profession: (db.profileMeta && db.profileMeta.profession) || '', id: u.id, source: 'modal' });
         toast('ID ' + chunkId(u.id) + ' created — your workspace now follows you everywhere.', 'ok');
       } else {
         u = await login($('#aId').value, $('#aPass').value);
@@ -1659,30 +1965,48 @@ function settingsModal() {
     '<div class="label" style="margin-top:2px">Appearance</div>' +
     '<div class="set-row"><span class="sig-dot">' + I.check(14) + '</span>' +
       '<div class="s-info"><div class="s-t">Signature look</div><div class="s-d">Monochrome ink — part of every SYNCRO surface</div></div></div>' +
-    '<div class="set-row"><div class="s-info"><div class="s-t">Theme</div><div class="s-d">Dark or light, remembered on this device</div></div>' +
-      '<div class="seg" style="width:190px"><button type="button" id="thLight" class="' + (db.theme === 'light' ? 'on' : '') + '">' + I.sun(14) + 'Light</button>' +
-      '<button type="button" id="thDark" class="' + (db.theme === 'dark' ? 'on' : '') + '">' + I.moon(14) + 'Dark</button></div></div>' +
+    '<div class="set-row"><div class="s-info"><div class="s-t">Theme</div><div class="s-d">' + (db.theme === 'pixel' ? 'Pixel Terminal — white &amp; blue, hard edges, zero curves' : 'Remembered on this device') + '</div></div>' +
+      '<div class="seg" style="width:286px"><button type="button" id="thLight" class="' + (db.theme === 'light' ? 'on' : '') + '">' + I.sun(14) + 'Light</button>' +
+      '<button type="button" id="thDark" class="' + (db.theme === 'dark' ? 'on' : '') + '">' + I.moon(14) + 'Dark</button>' +
+      '<button type="button" id="thPixel" class="' + (db.theme === 'pixel' ? 'on' : '') + '">' + I.terminal(14) + 'Pixel</button></div></div>' +
     '<div class="label" style="margin-top:10px">Account</div>' +
-    '<div class="set-row"><div class="avatar" style="background:' + av + ';width:38px;height:38px">' + esc(initials()) + '</div>' +
-      '<div class="s-info"><div class="s-t">' + esc(session.name) + '</div><div class="s-d">' + (session.guest ? 'Untitled — temporary, saved only on this device' : 'ID <b style="font-family:\'JetBrains Mono\',monospace;letter-spacing:.08em">' + esc(chunkId(session.id)) + '</b> · synced to the live server') + '</div></div>' +
+    '<div class="set-row"><button type="button" class="avatar" id="sAvatar" title="Upload a profile picture" style="background:' + av + ';width:44px;height:44px;cursor:pointer">' + (myPic() ? '<img class="pimg" src="' + esc(myPic()) + '" alt="Profile picture">' : esc(initials())) + '<span class="cam">' + I.camera(11) + '</span></button>' +
+      '<input type="file" id="sPicFile" accept="image/*" hidden>' +
+      '<div class="s-info"><div class="s-t">' + esc(session.name) + (!session.guest && isOwnerId(session.id) ? ' <span class="owner-badge">Owner</span>' : '') + (db.profileMeta && db.profileMeta.profession ? ' <span style="font-weight:600;color:var(--text3)">· ' + esc(db.profileMeta.profession) + '</span>' : '') + '</div><div class="s-d">' + (session.guest ? 'Untitled — temporary, saved only on this device' : 'ID <b style="font-family:\'JetBrains Mono\',monospace;letter-spacing:.08em">' + esc(chunkId(session.id)) + '</b> · synced to the live server' + (isOwnerId(session.id) ? ' · <b>owner rights</b>' : '')) + '</div></div>' +
       '<div style="display:flex;flex-direction:column;gap:6px">' +
       (session.guest ? '<button class="btn btn-sm btn-primary" id="sCreate">' + I.user(14) + 'Create ID</button>' : '<button class="btn btn-sm" id="sCopyId">' + I.copy(14) + 'Copy ID</button>') +
       '<button class="btn btn-sm" id="sLogout">' + I.logout(14) + 'Log out</button></div></div>' +
     (!session.guest
       ? '<div class="label" style="margin-top:10px">Live server</div>' +
         '<div class="set-row"><div class="s-info"><div class="s-t">Cross-device sync</div><div class="s-d">' +
-        'Your workspace is snapshotted to the live server under ' + esc(chunkId(session.id)) + ' as you edit. Sign in with that ID + your password on any device and everything comes back — and while both devices are signed in, edits made on one appear on the other within a second or two.' + '</div></div>' +
+        'Your whole workspace is snapshotted to the live server under ' + esc(chunkId(session.id)) + ' as you edit. Sign in with that ID + your password on any device and everything comes back.' + '</div></div>' +
         '<span class="kind-badge">' + (cloudOn ? 'Connected' : 'Offline') + '</span></div>' +
         '<div class="set-row"><div class="s-info"><div class="s-t">Server</div><div class="s-d" style="font-family:\'JetBrains Mono\',monospace;font-size:11px;word-break:break-all">' + esc(MQTT_URL) + '</div></div></div>'
+      : '') +
+    (!session.guest && isOwnerId(session.id)
+      ? '<div class="label" style="margin-top:10px">Owner \u00b7 USER EMAILS</div>' +
+        '<div class="set-row"><div class="s-info"><div class="s-t">The sign-up sheet</div><div class="s-d">' + (sheetUrl() ? 'Connected — sign-up emails land in your <b>USER EMAILS</b> Google Sheet from every device.' : 'Not connected yet. Connect your Google Sheet so sign-up emails reach <b>USER EMAILS</b> from every device.') + '</div></div>' +
+        '<div style="display:flex;flex-direction:column;gap:6px"><button class="btn btn-sm" id="ueView">Open sheet</button>' +
+        '<button class="btn btn-sm" id="ueSetup">Sheet setup</button></div></div>'
       : '') +
     '<div class="label" style="margin-top:10px;color:var(--danger)">Danger zone</div>' +
     '<div class="set-row"><div class="s-info"><div class="s-t">Delete ID</div><div class="s-d">Removes your ID from the live server and this device, with every document</div></div>' +
       '<button class="btn btn-sm btn-danger" id="sDelete">' + I.trash(14) + 'Delete</button></div>' +
-    '<div class="rp-hint" style="margin-top:10px">Your ID is public on the live server so any device can find it; your password never leaves this device unhashed (salted SHA-256). Version 1.5 — live cross-device sync</div></div>', { wide: true });
+    '<div class="rp-hint" style="margin-top:10px">Your ID is public on the live server so any device can find it; your password never leaves this device unhashed (salted SHA-256). Version 1.4 — ID sign-in</div></div>', { wide: true });
   $('#thLight').addEventListener('click', () => { applyTheme('light'); saveSoon(); settingsModal(); });
   $('#thDark').addEventListener('click', () => { applyTheme('dark'); saveSoon(); settingsModal(); });
+  $('#thPixel').addEventListener('click', () => { applyTheme('pixel'); saveSoon(); settingsModal(); });
+  const sAv = $('#sAvatar'), sPicFile = $('#sPicFile');
+  if (sAv && sPicFile) {
+    sAv.addEventListener('click', () => sPicFile.click());
+    sPicFile.addEventListener('change', e => { const f = e.target.files[0]; if (f) changeProfilePic(f); e.target.value = ''; });
+  }
   const sCreate = $('#sCreate');
   if (sCreate) sCreate.addEventListener('click', () => { closeModal(); authModal(); });
+  const ueBtn = $('#ueView');
+  if (ueBtn) ueBtn.addEventListener('click', ownerEmailsModal);
+  const ueSetup = $('#ueSetup');
+  if (ueSetup) ueSetup.addEventListener('click', sheetSetupModal);
   const sCopy = $('#sCopyId');
   if (sCopy) sCopy.addEventListener('click', () => { copyText(session.id).then(() => toast('ID copied — others still need your password to sign in with it.', 'ok')); });
   $('#sLogout').addEventListener('click', () => { closeModal(); logout(); });
@@ -1802,7 +2126,8 @@ function nodeMenu(node, anchor, done) {
 }
 function renameNode(node) {
   promptModal({ title: 'Rename', label: 'Name', value: node.name, onOk: v => {
-    node.name = v; node.updatedAt = now(); markDirty(); renderSidebar(); refreshDocChrome();
+    const n = myData().nodes[node.id]; if (!n) return;   /* fresh lookup — never rename a stale copy */
+    n.name = v; n.updatedAt = now(); markDirty(); renderSidebar(); refreshDocChrome();
   }});
 }
 function deleteNode(node) {
@@ -1844,7 +2169,7 @@ function createDoc(kind, parentId) {
   const d = myData();
   if (parentId == null) parentId = defaultParent();
   const n = { id: uid(), ws: current.wsId, parentId: parentId || null, kind, name: 'Untitled ' + KIND_LABEL[kind].toLowerCase(),
-    content: kind === 'note' ? '' : kind === 'sheet' ? { cols: 6, rows: 14, cells: {}, font: { family: "'Inter',system-ui,sans-serif", size: 14 } } : { lists: [{ id: uid(), title: 'To do', cards: [] }, { id: uid(), title: 'Doing', cards: [] }, { id: uid(), title: 'Done', cards: [] }] },
+    content: kind === 'note' ? '' : kind === 'sheet' ? { cols: 6, rows: 14, cells: {}, font: { family: "'Anthropic Sans','Inter',system-ui,sans-serif", size: 14 } } : { lists: [{ id: uid(), title: 'To do', cards: [] }, { id: uid(), title: 'Doing', cards: [] }, { id: uid(), title: 'Done', cards: [] }] },
     createdAt: now(), updatedAt: now() };
   if (parentId && d.nodes[parentId]) d.expanded[parentId] = true;
   d.nodes[n.id] = n; d.lastDoc = n.id;
@@ -1907,6 +2232,8 @@ function openDoc(id) {
   else if (node.kind === 'sheet') renderSheet(node);
   else if (node.kind === 'board') renderBoard(node);
   updateInfo(); updateShareUI(); updateFontSec();
+  const nd = id ? d.nodes[id] : null;
+  paintedDoc = nd ? { id: nd.id, name: nd.name, updatedAt: nd.updatedAt, len: nd.kind === 'note' ? (nd.content || '').length : -1 } : null;
 }
 function updateInfo() {
   const d = myData(), node = current.docId ? d.nodes[current.docId] : null;
@@ -1929,12 +2256,13 @@ function updateInfo() {
             '<div class="info-line"><span>Cards</span><b>' + lists.reduce((a, l) => a + l.cards.length, 0) + '</b></div>';
   }
   el.innerHTML = rows;
+  updateNoteImgs();
 }
 
 /* ---------- fonts data ---------- */
 const FONTS = [
   { g: 'Sans', items: [
-    ['Sans (default)', "'Inter',system-ui,sans-serif"], ['System UI', "system-ui,sans-serif"],
+    ['Inter (default)', "'Anthropic Sans','Inter',system-ui,sans-serif"], ['Anthropic Sans', "'Anthropic Sans','Inter',sans-serif"], ['System UI', "system-ui,sans-serif"],
     ['Arial', "Arial,sans-serif"], ['Helvetica', "Helvetica,Arial,sans-serif"], ['Verdana', "Verdana,sans-serif"],
     ['Tahoma', "Tahoma,sans-serif"], ['Trebuchet MS', "'Trebuchet MS',sans-serif"], ['Poppins', "'Poppins',sans-serif"]] },
   { g: 'Serif', items: [
@@ -1965,9 +2293,9 @@ function renderNote(node) {
   noteEd = $('#noteEd');
   noteEd.innerHTML = (node.content && node.content.trim()) ? node.content : '<p><br></p>';
   const f = (node.font = node.font || {});
-  noteEd.style.fontFamily = f.family || "'Inter',system-ui,sans-serif";
+  noteEd.style.fontFamily = f.family || "'Anthropic Sans','Inter',system-ui,sans-serif";
   noteEd.style.fontSize = (f.size || 16) + 'px';
-  $('#fontFamily').value = f.family || "'Inter',system-ui,sans-serif";
+  $('#fontFamily').value = f.family || "'Anthropic Sans','Inter',system-ui,sans-serif";
   $('#fontSize').value = String(f.size || 16);
   noteEd.addEventListener('input', () => {
     node.content = noteEd.innerHTML; node.updatedAt = now();
@@ -1978,10 +2306,25 @@ function renderNote(node) {
     if (box) { const li = box.closest('li'); li.classList.toggle('done'); node.content = noteEd.innerHTML; node.updatedAt = now(); markDirty(); }
   });
   noteEd.addEventListener('paste', e => {
+    const cFiles = e.clipboardData && e.clipboardData.files;
+    if (cFiles && cFiles.length && /^image\//.test(cFiles[0].type)) { e.preventDefault(); attachImage(cFiles[0]); return; }
     e.preventDefault();
     const html = e.clipboardData.getData('text/html');
     if (html) document.execCommand('insertHTML', false, sanitizeHTML(html));
     else document.execCommand('insertText', false, e.clipboardData.getData('text/plain'));
+  });
+  const keepCaret = () => { const s = window.getSelection(); if (s && s.rangeCount && noteEd.contains(s.getRangeAt(0).commonAncestorContainer)) lastNoteRange = s.getRangeAt(0).cloneRange(); };
+  noteEd.addEventListener('keyup', keepCaret);
+  noteEd.addEventListener('mouseup', keepCaret);
+  noteEd.addEventListener('dragover', e => { e.preventDefault(); noteEd.classList.add('drop'); });
+  noteEd.addEventListener('dragleave', () => noteEd.classList.remove('drop'));
+  noteEd.addEventListener('drop', e => {
+    e.preventDefault(); noteEd.classList.remove('drop');
+    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (!f) return;
+    if (!/^image\//.test(f.type)) { toast('Only images can be dropped here.', 'err'); return; }
+    try { if (document.caretRangeFromPoint) { const r = document.caretRangeFromPoint(e.clientX, e.clientY); if (r && noteEd.contains(r.startContainer)) { const s = window.getSelection(); s.removeAllRanges(); s.addRange(r); lastNoteRange = r.cloneRange(); } } } catch (x) {}
+    attachImage(f);
   });
   noteEd.addEventListener('keyup', selFloatTb);
   noteEd.addEventListener('mouseup', selFloatTb);
@@ -1989,6 +2332,102 @@ function renderNote(node) {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); toast('SYNCRO saves automatically — all changes are in.', 'ok'); }
   });
   document.execCommand('styleWithCSS', false, true);
+  updateNoteImgs();
+}
+/* ---------- note images — attach, upload to the asset vault, live side previews ----------
+   An image lands in the note as an <img> served from the server's asset vault
+   (/assets/<id>.<ext>), so the whole workspace — images included — keeps syncing
+   to every device with the ID. The right panel keeps a live thumbnail strip. */
+let lastNoteRange = null;
+function fileToDataURL(file) {
+  return new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = rej; fr.readAsDataURL(file); });
+}
+function compressImage(dataUrl, maxDim, q) {
+  return new Promise((res, rej) => {
+    const im = new Image();
+    im.onload = () => {
+      let w = im.naturalWidth || maxDim, h = im.naturalHeight || maxDim;
+      const sc = Math.min(1, maxDim / Math.max(w, h));
+      w = Math.max(1, Math.round(w * sc)); h = Math.max(1, Math.round(h * sc));
+      const c = document.createElement('canvas'); c.width = w; c.height = h;
+      c.getContext('2d').drawImage(im, 0, 0, w, h);
+      try { res(c.toDataURL('image/jpeg', q)); } catch (e) { rej(e); }
+    };
+    im.onerror = rej; im.src = dataUrl;
+  });
+}
+async function attachImage(file) {
+  const node = current.docId ? myData().nodes[current.docId] : null;
+  if (!node || node.kind !== 'note' || !noteEd) return;
+  if (!file || !/^image\//.test(file.type)) { toast('That file is not an image.', 'err'); return; }
+  let dataUrl = await fileToDataURL(file);
+  if (!(file.type === 'image/gif' && file.size <= 180000)) {
+    for (const dimq of [[1600, .82], [1280, .72], [1000, .62], [800, .55]]) {
+      try { dataUrl = await compressImage(dataUrl, dimq[0], dimq[1]); } catch (e) { break; }
+      if (dataUrl.length * 0.75 <= 185000) break;
+    }
+  }
+  if (dataUrl.length * 0.75 > 195000) { toast('That image is too large even after compression.', 'err'); return; }
+  /* put the caret back where the user last was, then drop in an uploading placeholder */
+  noteEd.focus();
+  try { const s = window.getSelection(); if (lastNoteRange && noteEd.contains(lastNoteRange.commonAncestorContainer)) { s.removeAllRanges(); s.addRange(lastNoteRange); } } catch (e) {}
+  const phid = 'up' + uid();
+  document.execCommand('insertHTML', false,
+    '<div class="nimg-wrap up" id="' + phid + '"><img class="nimg" alt="Uploading image…" src="' + dataUrl + '"><span class="nimg-up"><i></i>Uploading…</span></div><p><br></p>');
+  node.content = noteEd.innerHTML; node.updatedAt = now(); markDirty(); updateInfo(); updateNoteImgs();
+  try {
+    const r = await fetch('/api/assets', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dataurl: dataUrl, owner: (session && !session.guest) ? session.id : '' }) });
+    const j = await r.json();
+    if (!j || !j.ok || !j.url) throw 0;
+    const ph = document.getElementById(phid);
+    if (ph) {
+      const im = ph.querySelector('img'); if (im) { im.src = j.url; im.removeAttribute('alt'); }
+      ph.classList.remove('up');
+      const up = ph.querySelector('.nimg-up'); if (up) up.remove();
+      ph.removeAttribute('id');
+      node.content = noteEd.innerHTML; node.updatedAt = now(); markDirty(); updateNoteImgs();
+    }
+    toast('Image saved — syncing to your other devices.', 'ok');
+  } catch (e) {
+    /* no asset server (static hosting) — keep the compressed image inline;
+       it still syncs to every device as part of the note content */
+    const ph = document.getElementById(phid);
+    if (ph) {
+      ph.classList.remove('up');
+      const up = ph.querySelector('.nimg-up'); if (up) up.remove();
+      const im = ph.querySelector('img'); if (im) im.removeAttribute('alt');
+      ph.removeAttribute('id');
+    }
+    node.content = noteEd.innerHTML; node.updatedAt = now(); markDirty(); updateNoteImgs();
+    toast('Image kept inline — syncing with the note.', 'ok');
+  }
+}
+function noteImagesOf(node) {
+  if (!node || node.kind !== 'note' || !node.content) return [];
+  const tmp = document.createElement('div'); tmp.innerHTML = node.content;
+  return $$('img.nimg', tmp).map(im => im.getAttribute('src')).filter(Boolean);
+}
+function updateNoteImgs() {
+  const sec = $('#secImages'), grid = $('#noteImgs'); if (!sec || !grid) return;
+  const node = current.docId ? myData().nodes[current.docId] : null;
+  const isNote = node && node.kind === 'note';
+  sec.style.display = isNote ? '' : 'none';
+  if (!isNote) { grid.innerHTML = ''; return; }
+  const srcs = noteImagesOf(node);
+  grid.innerHTML = srcs.map((s, i) =>
+    '<button type="button" class="nthumb' + (/^data:/.test(s) ? ' up' : '') + '" data-i="' + i + '" title="Preview image">' +
+    '<img src="' + esc(s) + '" alt="" loading="lazy"><span class="nx" title="Remove image">' + I.x(11) + '</span></button>').join('');
+  $$('#noteImgs .nthumb').forEach((t, i) => t.addEventListener('click', e => {
+    if (e.target.closest('.nx')) {
+      const im = $$('img.nimg', noteEd)[i];
+      if (im) { const w = im.closest('.nimg-wrap'); (w || im).remove(); }
+      node.content = noteEd.innerHTML; node.updatedAt = now(); markDirty(); updateInfo(); updateNoteImgs();
+      toast('Image removed.', 'ok');
+      return;
+    }
+    openModal('<div class="v-lightbox"><img src="' + esc(srcs[i]) + '" alt="Image preview"></div>', { wide: true });
+  }));
 }
 function sanitizeHTML(html) {
   const t = document.createElement('template'); t.innerHTML = html;
@@ -2064,6 +2503,7 @@ function updateFontSec() {
   const d = myData(), node = current.docId ? d.nodes[current.docId] : null;
   const isNote = node && node.kind === 'note', isSheet = node && node.kind === 'sheet', isBoard = node && node.kind === 'board';
   $('#secFont').style.display = node ? '' : 'none';
+  $('#secImages').style.display = isNote ? '' : 'none';
   $('#noteStyleBtns').style.display = isNote ? '' : 'none';
   $('#noteBlockBtns').style.display = isNote ? '' : 'none';
   $('#textColorRow').style.display = isNote ? '' : 'none';
@@ -2624,7 +3064,7 @@ function updateShareUI() {
     : 'Sharing by link needs a free SYNCRO ID — you will be asked to create or sign in one.';
   $('#expBtn').innerHTML = I.download(15) + 'Export file (.json)';
   $('#impBtn').innerHTML = I.upload(15) + 'Import file';
-  $('#pdfBtn').innerHTML = I.printer(15) + 'Convert to PDF';
+  $('#pdfBtn').innerHTML = I.printer(15) + 'PDF Design Studio';
   $('#newDocBtn').innerHTML = I.plus(16) + 'New document';
 }
 function requireId(action) {
@@ -2645,33 +3085,150 @@ function buildShareLink() {
   copyText(link).then(() => toast('Share link copied — anyone with it can view this page.', 'ok'))
     .catch(() => promptModal({ title: 'Your share link', label: 'Copy it manually', value: link, okLabel: 'Close', onOk: () => {} }));
 }
-/* ---- print / PDF ---- */
+/* ---- PDF design studio — pick a sassy deck theme, then export ----
+   Every page carries the Syncro URL bottom-right; the cover is a proper
+   presentation slide. The chosen theme is remembered per account, so it
+   syncs to every device with the ID. */
+const PDF_THEMES = [
+  { id: 'midnight', name: 'Midnight Ink', tag: 'Dark · serif',
+    cover: 'linear-gradient(135deg,#131318,#2c2c38)', coverInk: '#f2efe8',
+    page: '#ffffff', ink: '#1b1b1d', sub: '#63636b', accent: '#c9a227', accentSoft: '#f6efdb', line: '#dedee3',
+    head: "Georgia,'Times New Roman',serif", body: "Georgia,'Times New Roman',serif", ui: "Arial,Helvetica,sans-serif" },
+  { id: 'paper', name: 'Paper Classic', tag: 'Cream · editorial',
+    cover: 'linear-gradient(135deg,#f4efe4,#e6dcc6)', coverInk: '#232019',
+    page: '#fffdf8', ink: '#232019', sub: '#6d675a', accent: '#b3541e', accentSoft: '#f7e9dc', line: '#e4ddca',
+    head: "Georgia,'Times New Roman',serif", body: "Georgia,'Times New Roman',serif", ui: "Arial,Helvetica,sans-serif" },
+  { id: 'rose', name: 'Sassy Rose', tag: 'Pink · bold',
+    cover: 'linear-gradient(135deg,#ff7eb3,#ff2e88)', coverInk: '#ffffff',
+    page: '#fffafc', ink: '#3d0a24', sub: '#a15b7d', accent: '#e73c7e', accentSoft: '#ffe4f0', line: '#ffd4e6',
+    head: "'Anthropic Sans','Inter',system-ui,sans-serif", body: "'Anthropic Sans','Inter',system-ui,sans-serif", ui: "'Anthropic Sans','Inter',Arial,sans-serif" },
+  { id: 'sage', name: 'Sage Studio', tag: 'Green · calm',
+    cover: 'linear-gradient(135deg,#20372c,#3f6d51)', coverInk: '#f0f7f0',
+    page: '#fbfdf9', ink: '#1c2b22', sub: '#5d7263', accent: '#2f9e44', accentSoft: '#e1f3e4', line: '#d6e7d9',
+    head: "'Anthropic Sans','Inter',system-ui,sans-serif", body: "'Anthropic Sans','Inter',system-ui,sans-serif", ui: "'Anthropic Sans','Inter',Arial,sans-serif" },
+  { id: 'ocean', name: 'Ocean Deck', tag: 'Blue · crisp',
+    cover: 'linear-gradient(135deg,#0b3d91,#1f6fd6)', coverInk: '#eef4ff',
+    page: '#fafcff', ink: '#0e2242', sub: '#5a7396', accent: '#1f6fd6', accentSoft: '#e2ecfd', line: '#d4e3f6',
+    head: "'Anthropic Sans','Inter',system-ui,sans-serif", body: "'Anthropic Sans','Inter',system-ui,sans-serif", ui: "'Anthropic Sans','Inter',Arial,sans-serif" },
+  { id: 'pop', name: 'Sunset Pop', tag: 'Gradient · playful',
+    cover: 'linear-gradient(135deg,#f59e0b,#ef4444 55%,#8b5cf6)', coverInk: '#ffffff',
+    page: '#fffdfb', ink: '#331410', sub: '#96655c', accent: '#ef4444', accentSoft: '#fee6e2', line: '#ffd9cf',
+    head: "'Anthropic Sans','Inter',system-ui,sans-serif", body: "'Anthropic Sans','Inter',system-ui,sans-serif", ui: "'Anthropic Sans','Inter',Arial,sans-serif" },
+  { id: 'pixel', name: 'Pixel Terminal', tag: 'Blue · 8-bit · zero curves',
+    cover: 'repeating-linear-gradient(0deg,rgba(255,255,255,.08) 0 2px,transparent 2px 7px),linear-gradient(135deg,#0b1c3d,#1f5eff)', coverInk: '#eaf2ff',
+    page: '#ffffff', ink: '#0b1c3d', sub: '#3d5784', accent: '#1f5eff', accentSoft: '#dbe7ff', line: '#ccd9f2',
+    head: "'JetBrains Mono','Courier New',monospace", body: "'JetBrains Mono','Courier New',monospace", ui: "'JetBrains Mono','Courier New',monospace", blocky: true },
+];
+function pdfTheme() { return PDF_THEMES.find(t => t.id === db.pdfTheme) || PDF_THEMES[0]; }
+function syncroUrl() { return (location.origin && location.origin !== 'null' && location.origin !== '') ? location.origin : 'http://127.0.0.1:8787'; }
+
 function printDoc() {
   const node = myCur();
   if (!node) { toast('Open a document first.'); return; }
+  const cur = pdfTheme();
+  openModal(mHead('PDF Design Studio', I.image(20)) +
+    '<div class="m-body">' +
+      '<div class="label" style="margin-top:2px">Pick a deck theme</div>' +
+      '<div class="pd-themes">' + PDF_THEMES.map(t =>
+        '<button type="button" class="pd-theme' + (t.id === cur.id ? ' on' : '') + '" data-pd="' + t.id + '" title="' + esc(t.name) + '">' +
+          '<span class="pd-shot"><span class="cov" style="background:' + t.cover + '"></span>' +
+          '<span class="bar" style="background:' + t.coverInk + '"></span>' +
+          '<span class="ln" style="background:' + t.coverInk + '"></span>' +
+          '<span class="ln" style="background:' + t.coverInk + ';width:46%"></span></span>' +
+          '<span class="pd-name">' + esc(t.name) + '<span class="pd-tag">' + esc(t.tag) + '</span></span></button>').join('') + '</div>' +
+      '<div class="pd-opts">' +
+        '<label class="pd-check"><input type="checkbox" id="pdCover"' + (db.pdfCover === false ? '' : ' checked') + '> Cover slide — a big title page, deck-style</label>' +
+        '<label class="pd-check"><input type="checkbox" id="pdMeta"' + (db.pdfMeta === false ? '' : ' checked') + '> Show author &amp; date on the cover</label>' +
+      '</div>' +
+      '<div class="pd-note">Every page carries the <b>Syncro URL bottom-right</b>. Exporting <b>' + esc(node.name) + '</b> — ' + KIND_LABEL[node.kind] + '.</div>' +
+    '</div>' +
+    '<div class="m-foot"><button class="btn" data-close>Cancel</button>' +
+    '<button class="btn btn-primary" id="pdGo">' + I.printer(15) + 'Export PDF</button></div>', { wide: true });
+  $$('.pd-theme').forEach(b => b.addEventListener('click', () => {
+    db.pdfTheme = b.dataset.pd; saveNow();
+    $$('.pd-theme').forEach(x => x.classList.toggle('on', x === b));
+  }));
+  $('#pdCover').addEventListener('change', e => { db.pdfCover = e.target.checked; saveNow(); });
+  $('#pdMeta').addEventListener('change', e => { db.pdfMeta = e.target.checked; saveNow(); });
+  $('#pdGo').addEventListener('click', () => { closeModal(); exportStyledPDF(); });
+}
+
+function pdfDocCSS(th) {
+  return '@page{margin:16mm 0 20mm}' +
+  '*{box-sizing:border-box}' +
+  'body{font-family:' + th.body + ';color:' + th.ink + ';font-size:12pt;line-height:1.65;margin:0 18mm;background:' + th.page + '}' +
+  /* cover slide */
+  '.pr-cover{page-break-after:always;min-height:235mm;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;' +
+    'background:' + th.cover + ';color:' + th.coverInk + ';border-radius:7mm;padding:22mm 18mm;position:relative}' +
+  '.pr-cover .c-brand{position:absolute;top:14mm;left:18mm;font-family:' + th.ui + ';font-size:11pt;font-weight:800;letter-spacing:.26em}' +
+  '.pr-cover .c-brand .dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#3fae44;margin-left:5px}' +
+  '.pr-cover .c-kind{font-family:' + th.ui + ';font-size:10pt;font-weight:800;letter-spacing:.3em;text-transform:uppercase;opacity:.85;margin-bottom:7mm}' +
+  '.pr-cover h1{font-family:' + th.head + ';font-size:33pt;line-height:1.14;margin:0 0 8mm;font-weight:700}' +
+  '.pr-cover .c-sub{font-family:' + th.ui + ';font-size:11pt;opacity:.9;letter-spacing:.02em}' +
+  /* content */
+  '.pr-kind{font-family:' + th.ui + ';font-size:9pt;letter-spacing:.24em;text-transform:uppercase;color:' + th.accent + ';font-weight:800;margin-bottom:2mm}' +
+  '.pr-title{font-family:' + th.head + ';font-size:23pt;font-weight:700;margin:0 0 8mm;padding-bottom:4mm;border-bottom:2.5px solid ' + th.accent + '}' +
+  'h1{font-size:18pt;margin:.8em 0 .35em;line-height:1.25}' +
+  'h2{font-size:14.5pt;margin:.8em 0 .3em;border-left:4px solid ' + th.accent + ';padding-left:4mm;line-height:1.3}' +
+  'h3{font-size:12.5pt;margin:.7em 0 .25em;color:' + th.ink + '}' +
+  'p{margin:0 0 .55em}' +
+  'ul.ck{list-style:none;padding-left:0}ul.ck li::before{content:"\\2610  "}ul.ck li.done::before{content:"\\2611  "}' +
+  'blockquote{border-left:3.5px solid ' + th.accent + ';background:' + th.accentSoft + ';margin:.7em 0;padding:3mm 5.5mm;border-radius:0 3mm 3mm 0;color:' + th.ink + '}' +
+  'pre{background:' + th.accentSoft + ';border:1px solid ' + th.line + ';padding:3mm 4mm;border-radius:2.5mm;font-family:"Courier New",monospace;font-size:9.5pt;white-space:pre-wrap}' +
+  'code{font-family:"Courier New",monospace;font-size:9.5pt}' +
+  'hr{border:none;border-top:1.5px solid ' + th.line + ';margin:6mm 0}' +
+  'a{color:' + th.accent + '}' +
+  'img{max-width:100%}' +
+  'table.data{border-collapse:collapse;width:100%;font-family:' + th.ui + ';font-size:9.5pt}' +
+  'table.data th,table.data td{border:1px solid ' + th.line + ';padding:2.2mm 3mm}' +
+  'table.data th{background:' + th.accentSoft + ';color:' + th.ink + ';text-align:center;font-weight:700}' +
+  'table.data td.num{text-align:right;font-variant-numeric:tabular-nums}' +
+  '.blist h3{font-size:13pt;color:' + th.accent + ';margin:6mm 0 2mm;font-family:' + th.head + '}.blist ul{margin:0 0 0 6mm;padding:0}li{margin-bottom:2mm}' +
+  /* footer — fixed so it repeats on every printed page; Syncro URL bottom-right */
+  '.pr-foot{position:fixed;bottom:0;left:18mm;right:18mm;display:flex;justify-content:space-between;align-items:center;' +
+    'font-family:' + th.ui + ';font-size:8pt;letter-spacing:.16em;text-transform:uppercase;color:' + th.sub + ';border-top:1px solid ' + th.line + ';padding-top:2.5mm}' +
+  '.pr-foot .fbrand{font-weight:800;color:' + th.ink + '}' +
+  '.pr-foot .fbrand .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#3fae44;margin-left:3px}' +
+  '.pr-foot .furl{font-weight:700;color:' + th.accent + '}' +
+  (th.blocky ? blockyCSS(th) : '');
+}
+/* pixel terminal deck — zero curves, hard offset shadows, >_ prompt marks */
+function blockyCSS(th) {
+  return '.pr-cover{border-radius:0;border:3px solid ' + th.ink + ';box-shadow:10px 10px 0 ' + th.accentSoft + '}' +
+  '.pr-cover .c-brand .dot{border-radius:0;background:' + th.accent + '}' +
+  '.pr-cover .c-kind::before{content:" >_ ";letter-spacing:.1em}' +
+  '.pr-kind::before{content:" >_ ";letter-spacing:.1em}' +
+  '.pr-title{border-bottom-width:3px}' +
+  'h2{border-left-width:6px}' +
+  'blockquote{border-radius:0;border-left-width:4px}' +
+  'pre{border-radius:0;border:1.5px solid ' + th.ink + ';box-shadow:4px 4px 0 ' + th.accentSoft + '}' +
+  '.pr-foot{border-top:2px solid ' + th.ink + '}' +
+  '.pr-foot .fbrand .dot{border-radius:0;background:' + th.accent + '}';
+}
+function pdfCoverHTML(node, th) {
+  const date = new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
+  const meta = db.pdfMeta === false ? '' :
+    '<div class="c-sub">' + esc(session && session.name ? session.name : 'SYNCRO') + ' · ' + esc(date) + '</div>';
+  return '<div class="pr-cover"><div class="c-brand">SYNCRO<span class="dot"></span></div>' +
+    '<div class="c-kind">' + KIND_LABEL[node.kind] + '</div><h1>' + esc(node.name) + '</h1>' + meta + '</div>';
+}
+function exportStyledPDF() {
+  const node = myCur();
+  if (!node) { toast('Open a document first.'); return; }
+  const th = pdfTheme();
+  const url = syncroUrl();
+  const css = pdfDocCSS(th);
+  const cover = db.pdfCover === false ? '' : pdfCoverHTML(node, th);
+  const foot = '<div class="pr-foot"><span class="fbrand">SYNCRO<span class="dot"></span></span><span class="furl">' + esc(url) + '</span></div>';
   const inner = printHTML(node);
-  const w = window.open('', '_blank', 'width=900,height=700');
+  const w = window.open('', '_blank', 'width=940,height=760');
   if (w && w.document) {
-    w.document.write('<!DOCTYPE html><html><head><title>' + esc(node.name) + ' — SYNCRO PDF</title><style>' +
-      'body{font-family:Georgia,"Times New Roman",serif;color:#141416;font-size:12.5pt;line-height:1.6;margin:20mm 18mm}' +
-      '.pr-kind{font-family:Arial,sans-serif;font-size:9pt;letter-spacing:.14em;text-transform:uppercase;color:#141416;font-weight:bold;margin-bottom:2mm}' +
-      '.pr-title{font-size:20pt;font-weight:bold;border-bottom:2px solid #141416;padding-bottom:3mm;margin-bottom:7mm}' +
-      'h1{font-size:19pt;margin:.7em 0 .35em}h2{font-size:15pt;margin:.7em 0 .3em}h3{font-size:13pt;margin:.6em 0 .25em}' +
-      'ul.ck{list-style:none;padding-left:0}ul.ck li::before{content:"\\2610  "}ul.ck li.done::before{content:"\\2611  "}' +
-      'blockquote{border-left:3px solid #8a8a90;margin:.6em 0;padding:2mm 5mm;color:#444;background:#f4f4f5}' +
-      'pre{background:#f4f4f5;border:1px solid #ddd;padding:3mm;font-family:"Courier New",monospace;font-size:9.5pt;white-space:pre-wrap}' +
-      'code{font-family:"Courier New",monospace;font-size:9.5pt}hr{border:none;border-top:1px solid #bbb;margin:6mm 0}' +
-      'table.data{border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:9.5pt}' +
-      'table.data th,table.data td{border:1px solid #c6c6ca;padding:2.2mm 3mm}' +
-      'table.data th{background:#f0f0f1;text-align:center}' +
-      'table.data td.num{text-align:right;font-variant-numeric:tabular-nums}' +
-      '.blist h3{font-size:13pt;color:#141416;margin:6mm 0 2mm}.blist ul{margin:0 0 0 6mm;padding:0}li{margin-bottom:2mm}' +
-      'img{max-width:100%}</style></head><body>' + inner +
-      '<script>setTimeout(function(){window.print()},350)<\/script></body></html>');
+    w.document.write('<!DOCTYPE html><html><head><title>' + esc(node.name) + ' — SYNCRO PDF</title><style>' + css + '</style></head><body>' + cover + inner + foot +
+      '<script>setTimeout(function(){window.print()},400)<\/script></body></html>');
     w.document.close();
     toast('Print dialog opened — choose "Save as PDF".', 'ok');
   } else {
-    $('#printArea').innerHTML = inner;
+    $('#printArea').innerHTML = '<style>' + css + '</style>' + cover + inner + foot;
     toast('Pop-up blocked — printing from this tab instead.', 'err');
     setTimeout(() => window.print(), 120);
   }
@@ -2882,14 +3439,28 @@ function wireChrome() {
   $('#treeFilter').addEventListener('input', debounce(renderSidebar, 120));
   $('#docTitle').addEventListener('input', debounce(() => {
     const node = myCur(); if (!node) return;
-    node.name = $('#docTitle').value.trim() || 'Untitled';
+    const v = $('#docTitle').value.trim();
+    if (v) node.name = v;      /* never snap back to “Untitled” while the field is mid-edit */
     node.updatedAt = now(); markDirty(); renderSidebar(); refreshDocChrome();
-  }, 250));
+  }, 200));
+  $('#docTitle').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); } });
   $('#shareBtn').addEventListener('click', () => requireId(buildShareLink));
   $('#pdfBtn').addEventListener('click', printDoc);
   $('#expBtn').addEventListener('click', exportFile);
   $('#impBtn').addEventListener('click', () => $('#impFile').click());
   $('#impFile').addEventListener('change', e => { if (e.target.files[0]) importFile(e.target.files[0]); e.target.value = ''; });
+  $('#addImgBtn').addEventListener('click', () => $('#noteImgFile').click());
+  $('#noteImgFile').addEventListener('change', e => {
+    const fs = e.target.files || [];
+    for (let i = 0; i < fs.length; i++) attachImage(fs[i]);
+    e.target.value = '';
+  });
+  $('#docTitle').addEventListener('blur', () => {
+    const node = myCur(); if (!node) return;
+    const v = $('#docTitle').value.trim();
+    if (v && v !== node.name) { node.name = v; node.updatedAt = now(); markDirty(); }   /* commit on blur — never snap back */
+    renderSidebar(); refreshDocChrome();
+  });
   window.addEventListener('hashchange', () => { if (location.hash.startsWith('#sv=')) tryOpenViewer(); });
   document.addEventListener('mousedown', e => { if (!e.target.closest('.menu')) closeMenu(); });
   document.addEventListener('keydown', e => {
@@ -2911,10 +3482,8 @@ function enterApp() {
   if (!d.workspaces.length) d.workspaces.push({ id: uid(), name: 'Personal', createdAt: now() });
   current.wsId = (d.lastWs && d.workspaces.find(w => w.id === d.lastWs)) ? d.lastWs : d.workspaces[0].id;
   /* profile */
-  const col = pickColor(session.guest ? 'guest' : (session.id || 'guest'));
-  $('#pAvatar').textContent = initials();
-  $('#pAvatar').style.background = 'linear-gradient(135deg,' + col[0] + ',' + col[1] + ')';
-  $('#pName').textContent = session.name;
+  paintProfileAvatars();
+  $('#pName').innerHTML = esc(session.name) + (!session.guest && isOwnerId(session.id) ? ' <span class="owner-badge">Owner</span>' : '');
   $('#pMail').textContent = session.guest ? 'Untitled · local only' : 'ID ' + chunkId(session.id) + ' · synced';
   $('#profileRow').classList.toggle('untitled', !!session.guest);
   applyTheme(db.theme);
@@ -2965,6 +3534,282 @@ function migrateLegacyUsers() {
   const first = Object.values(map)[0];
   if (first) setTimeout(() => toast('Your account is now ID ' + chunkId(first) + ' — same password, and it signs in on any device.', 'ok'), 1500);
 }
+/* ---------- the intro — a notebook opens, on every visit ---------- */
+let introTimer = null;
+function runIntro() {
+  applyTheme(db.theme || 'dark');
+  const meta = db.profileMeta || {};
+  const me = (db.session && db.users[db.session]) ? db.users[db.session] : null;
+  const inN = $('#inName'), inP = $('#inProf');
+  if (inN && !inN.value) inN.value = meta.name || (me && me.name) || '';
+  if (inP && !inP.value) inP.value = meta.profession || '';
+  const go = $('#inGo');
+  if (go) go.textContent = me ? 'Open my workspace' : (db.session === 'guest' ? 'Continue' : 'Open Syncro');
+  const alt = document.querySelector('#inC3 .in-alt');
+  if (alt && me) alt.style.display = 'none';   /* already has an ID — no sign-up push */
+  $('#intro').classList.remove('hidden');
+  document.body.classList.add('introing');
+  introStep(1);                                    /* the cover swings open, wordmark draws in */
+  setTimeout(() => { const c = $('#inC1'); if (c && !$('#intro').classList.contains('hidden')) c.classList.add('on'); }, 2100);
+}
+function introStep(n) {
+  const intro = $('#intro');
+  clearTimeout(introTimer);
+  [1, 2, 3, 4].forEach(i => {
+    const c = $('#inC' + i); if (c) c.classList.toggle('on', i === n);
+    const dd = $('#inD' + i); if (dd) dd.classList.toggle('on', i === n);
+  });
+  intro.classList.toggle('small', n >= 2);
+  intro.classList.add('word');
+  if (n === 4) {
+    const r = $('#inRName');
+    if (r && !r.value) r.value = (($('#inName') && $('#inName').value.trim()) || (db.profileMeta && db.profileMeta.name) || '');
+    const c = $('#inRCheck'); if (c) { c.className = 'in-idcheck'; c.textContent = ''; }
+    setTimeout(() => { const e2 = $('#inRId'); if (e2 && !e2.value) e2.focus(); }, 140);
+    introIdCheck();
+  }
+}
+function hideIntroOnly() {
+  clearTimeout(introTimer);
+  const el = $('#intro');
+  if (!el || el.classList.contains('hidden')) return;
+  el.classList.add('bye');
+  setTimeout(() => { el.classList.add('hidden'); el.classList.remove('bye', 'small', 'word'); document.body.classList.remove('introing'); }, 400);
+}
+function finishIntro(then) {
+  clearTimeout(introTimer);
+  const nm = ($('#inName') && $('#inName').value.trim()) || '';
+  const pf = ($('#inProf') && $('#inProf').value.trim()) || '';
+  if (nm || pf) {
+    db.profileMeta = { name: nm || (db.profileMeta && db.profileMeta.name) || '', profession: pf || (db.profileMeta && db.profileMeta.profession) || '' };
+    saveSoon();
+  }
+  hideIntroOnly();
+  if (then === 'gate' || then === 'gate-register') { showGate('register'); setTimeout(() => { const g = $('#gName'); if (g && nm) g.value = nm; }, 80); }
+  else if (then === 'gate-login') { showGate('login'); }
+  else if (db.session && db.users[db.session]) { const u = db.users[db.session]; session = { guest: false, id: u.id, name: u.name }; enterApp(); connectCloud(); }
+  else if (db.session === 'guest') { const m = db.profileMeta || {}; session = { guest: true, id: null, name: (String(m.name || '').trim() || 'Untitled') }; enterApp(); }
+  else guestSession();
+}
+
+/* ---------- intro sign-up — the create-ID form at the end of the introduction ---------- */
+function validEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(v || '').trim()); }
+let inIdTimer = null, inIdSeq = 0;
+function introIdCheck() {
+  const el = $('#inRCheck'); if (!el) return;
+  const id = normId($('#inRId') ? $('#inRId').value : '');
+  clearTimeout(inIdTimer);
+  if (id.length < 3 || id.length > 14) { el.className = 'in-idcheck'; el.textContent = id.length ? '3–14 letters or numbers (A–Z, 0–9)' : ''; return; }
+  el.className = 'in-idcheck'; el.textContent = 'Checking ' + chunkId(id) + '…';
+  const seq = ++inIdSeq;
+  inIdTimer = setTimeout(async () => {
+    const v0 = vaultGet(id);
+    if (v0 && v0.salt && v0.hash) { if (seq !== inIdSeq) return; el.className = 'in-idcheck taken'; el.textContent = chunkId(id) + ' is saved on this device — use “Sign in instead”.'; return; }
+    const net = await fetchProfile(id);
+    if (seq !== inIdSeq) return;
+    if (net.profile) { el.className = 'in-idcheck taken'; el.textContent = chunkId(id) + ' is taken — pick another.'; return; }
+    el.className = 'in-idcheck free'; el.textContent = chunkId(id) + ' is free — grab it!';
+  }, 550);
+}
+async function onIntroRegister(e) {
+  e.preventDefault();
+  const say = (m, cls) => { const err = $('#inRCheck'); if (err) { err.className = 'in-idcheck' + (cls ? ' ' + cls : ''); err.textContent = m; } };
+  const name = (($('#inRName') && $('#inRName').value) || '').trim() || (($('#inName') && $('#inName').value) || '').trim();
+  const idv = $('#inRId') ? $('#inRId').value : '';
+  const email = $('#inREmail') ? $('#inREmail').value : '';
+  const pass = $('#inRPass') ? $('#inRPass').value : '';
+  const pass2 = $('#inRPass2') ? $('#inRPass2').value : '';
+  if (!name) return say('Please tell me your name first.', 'taken');
+  if (!validEmail(email)) return say('Please add a valid email — it goes to the USER EMAILS sheet.', 'taken');
+  if (pass.length < 4) return say('Password needs at least 4 characters.', 'taken');
+  if (pass !== pass2) return say('The two passwords don\u2019t match.', 'taken');
+  const btn = $('#inRGo'); if (btn) { btn.disabled = true; btn.textContent = 'Creating your ID…'; }
+  try {
+    const u = await register(name, idv, pass, pass2);
+    db.profileMeta = { name: name, profession: (db.profileMeta && db.profileMeta.profession) || (($('#inProf') && $('#inProf').value.trim()) || '') };
+    saveSoon();
+    sendEmailToSheet({ email: email, name: name, profession: db.profileMeta.profession, id: u.id, source: 'intro' });
+    hideIntroOnly();
+    toast('ID ' + chunkId(u.id) + ' created — and your email is on the USER EMAILS sheet.', 'ok');
+    startSession(u);
+  } catch (er) {
+    say(typeof er === 'string' ? er : 'Something went wrong — please try again.', 'taken');
+    if (btn) { btn.disabled = false; btn.textContent = 'Create my ID & open Syncro'; }
+  }
+}
+
+/* ---------- the USER EMAILS sheet — pure HTML: sign-up emails fly straight to the owner's Google Sheet ----------
+   One-time setup (Settings → Owner → Sheet setup walks you through it):
+   make a Google Sheet named exactly USER EMAILS, paste the Apps Script,
+   deploy it as a web app, and put the /exec URL below — after that EVERY
+   device sends sign-up emails there, no server needed at all. */
+const USER_EMAILS_SHEET_URL = '';   /* ← paste your Apps Script web-app /exec URL (optional) */
+function sheetUrl() {
+  let u = '';
+  try { u = localStorage.getItem('syncro.sheetUrl') || ''; } catch (e) {}
+  return (u || USER_EMAILS_SHEET_URL || '').trim();
+}
+async function sendEmailToSheet(p) {
+  const payload = { email: String(p.email || '').toLowerCase(), name: p.name || '', profession: p.profession || '', id: p.id || '', source: p.source || 'signup', sheet: 'USER EMAILS' };
+  const url = sheetUrl();
+  if (url) {
+    try {   /* the Google Apps Script web app — works from ANY static hosting */
+      await fetch(url, { method: 'POST', mode: 'no-cors', body: new URLSearchParams(payload) });
+      return true;
+    } catch (e) {}
+  }
+  try {   /* same-origin fallback: the optional python server keeps a local mirror */
+    const r = await fetch('/api/emails', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    if (r.ok) return true;
+  } catch (e) {}
+  try {   /* nothing reachable — hold it, retry on next launch */
+    const q = JSON.parse(localStorage.getItem('syncro.emailq') || '[]'); q.push(Object.assign({ at: now() }, p));
+    localStorage.setItem('syncro.emailq', JSON.stringify(q.slice(-50)));
+  } catch (e) {}
+  return false;
+}
+function flushEmailQueue() {
+  if (!location.protocol.startsWith('http')) return;
+  let q = [];
+  try { q = JSON.parse(localStorage.getItem('syncro.emailq') || '[]'); } catch (e) { return; }
+  if (!q.length) return;
+  q.forEach(p => sendEmailToSheet(p));
+  try { localStorage.removeItem('syncro.emailq'); } catch (e) {}
+}
+function jsonp(url) {
+  return new Promise((res, rej) => {
+    const cb = 'uecb' + Math.floor(Math.random() * 1e9);
+    const s = document.createElement('script');
+    const done = (fn, v) => { clearTimeout(to); try { delete window[cb]; } catch (e) {} s.remove(); fn(v); };
+    const to = setTimeout(() => done(rej, 'timeout'), 9000);
+    window[cb] = d => done(res, d);
+    s.onerror = () => done(rej, 'error');
+    s.src = url + (url.indexOf('?') !== -1 ? '&' : '?') + 'callback=' + cb;
+    document.head.appendChild(s);
+  });
+}
+
+/* ---------- owner — the USER EMAILS sheet, right inside Settings ---------- */
+let ownerSheetKey = '';
+try { ownerSheetKey = sessionStorage.getItem('syncro.ownerKey') || ''; } catch (e) {}
+const APPS_SCRIPT_CODE = `function doPost(e) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName('USER EMAILS') || ss.insertSheet('USER EMAILS');
+  if (sh.getLastRow() === 0) sh.appendRow(['joined_at', 'email', 'name', 'profession', 'syncro_id', 'source']);
+  var p = e.parameter || {};
+  var email = String(p.email || '').toLowerCase();
+  if (email.indexOf('@') < 1) return ContentService.createTextOutput(JSON.stringify({ ok: false }));
+  var row = [new Date(), email, p.name || '', p.profession || '', p.id || '', p.source || 'signup'];
+  var data = sh.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][1]).toLowerCase() === email) {
+      sh.getRange(i + 1, 1, 1, 6).setValues([row]);   /* same email — same row, refreshed */
+      return ContentService.createTextOutput(JSON.stringify({ ok: true, updated: true }));
+    }
+  }
+  sh.appendRow(row);
+  return ContentService.createTextOutput(JSON.stringify({ ok: true }));
+}
+function doGet(e) {
+  var cb = (e.parameter || {}).callback || '';
+  var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('USER EMAILS');
+  var rows = sh ? sh.getDataRange().getValues() : [];
+  var list = [];
+  for (var i = 1; i < rows.length; i++) list.push({ joined_at: String(rows[i][0]), email: rows[i][1], name: rows[i][2], profession: rows[i][3], syncro_id: rows[i][4], source: rows[i][5] });
+  list.reverse();
+  var body = JSON.stringify({ ok: true, count: list.length, rows: list.slice(0, 500) });
+  return ContentService.createTextOutput(cb ? cb + '(' + body + ')' : body)
+    .setMimeType(ContentService.MimeType.JAVASCRIPT);
+}`;
+function sheetSetupModal() {
+  openModal(mHead('Connect the USER EMAILS sheet', I.file(20)) +
+    '<div class="m-body">' +
+    '<div class="rp-hint" style="margin-top:0">Five minutes, once — after this every sign-up email lands in <b>your</b> Google Sheet, from every device, with no server.</div>' +
+    '<div class="ue-steps"><b>1.</b> Go to <b>sheets.new</b> — name the file exactly <b>USER EMAILS</b>.<br>' +
+    '<b>2.</b> Menu <b>Extensions → Apps Script</b>, delete what is there, paste the code below.<br>' +
+    '<b>3.</b> <b>Deploy → New deployment → Web app</b> — “Execute as: <b>Me</b>”, “Who has access: <b>Anyone</b>” → Deploy.<br>' +
+    '<b>4.</b> Copy the web-app URL (it ends in <b>/exec</b>) and paste it below. That\u2019s it.</div>' +
+    '<pre class="ue-code" id="ueCode"></pre>' +
+    '<div class="form-field" style="margin-top:10px"><label>Apps Script web-app URL</label>' +
+    '<input class="inp" id="ueUrl" placeholder="https://script.google.com/macros/s/…/exec" spellcheck="false">' +
+    '<div class="form-err" id="ueErr"></div></div>' +
+    '<div class="m-foot" style="margin-top:4px"><button class="btn" id="ueCopy">Copy code</button>' +
+    '<span style="flex:1"></span><button class="btn" data-close>Cancel</button><button class="btn btn-primary" id="ueSave">Save URL</button></div></div>');
+  $('#ueCode').textContent = APPS_SCRIPT_CODE;
+  const inp = $('#ueUrl');
+  try { inp.value = localStorage.getItem('syncro.sheetUrl') || ''; } catch (e) {}
+  $('#ueCopy').addEventListener('click', () => copyText(APPS_SCRIPT_CODE).then(() => toast('Apps Script code copied — paste it in the sheet\u2019s Apps Script editor.', 'ok')));
+  $('#ueSave').addEventListener('click', () => {
+    const v = inp.value.trim();
+    if (v && !/^https?:\/\/.+\/exec($|\?)/.test(v)) { const er = $('#ueErr'); er.textContent = 'That doesn\u2019t look like a web-app URL — it should end in /exec.'; er.classList.add('show'); return; }
+    try { if (v) localStorage.setItem('syncro.sheetUrl', v); else localStorage.removeItem('syncro.sheetUrl'); } catch (e) {}
+    closeModal();
+    toast(v ? 'Connected — sign-up emails now land in your USER EMAILS sheet.' : 'Disconnected from the sheet.', 'ok');
+  });
+}
+function ownerEmailsModal() {
+  const gurl = sheetUrl();
+  const hdrs = () => ({ 'X-Owner': ownerSheetKey });
+  function renderSheet(rows, count, src) {
+    const n = count || 0;
+    const trs = rows.map(r =>
+      '<tr><td>' + esc(r.email || '') + '</td><td>' + esc(r.name || '') + '</td><td>' + esc(r.profession || '') + '</td>' +
+      '<td style="font-family:\'JetBrains Mono\',monospace">' + esc(chunkId(r.syncro_id || '')) + '</td><td>' + esc(r.joined_at || '') + '</td></tr>').join('');
+    openModal(mHead('USER EMAILS — ' + n + ' row' + (n === 1 ? '' : 's'), I.file(20)) +
+      '<div class="m-body">' +
+      (trs ? '<table class="ue-t"><thead><tr><th>Email</th><th>Name</th><th>Profession</th><th>ID</th><th>Joined</th></tr></thead><tbody>' + trs + '</tbody></table>'
+           : '<div class="rp-hint">Empty for now — the first sign-up will appear here.</div>') +
+      '<div style="display:flex;gap:10px;align-items:center;margin-top:12px"><button class="btn" id="ueCsv">Download CSV</button>' +
+      '<span class="rp-hint"><b>' + esc(src) + '</b> — same email updates the same row</span></div></div>');
+    $('#ueCsv').addEventListener('click', () => {
+      if (gurl) {   /* build the CSV in the browser from the rows we already fetched */
+        const fields = ['joined_at', 'email', 'name', 'profession', 'syncro_id', 'source'];
+        const q = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+        const blob = new Blob([fields.join(',') + '\r\n' + rows.map(r => fields.map(k => q(r[k])).join(',')).join('\r\n')], { type: 'text/csv' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'USER EMAILS.csv';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+        return;
+      }
+      fetch('/api/emails.csv', { headers: hdrs() }).then(r => r.blob()).then(b => {
+        const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'USER EMAILS.csv';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+      }).catch(() => toast('Could not download the sheet.', 'err'));
+    });
+  }
+  function askPass() {
+    openModal(mHead('Owner passcode', I.file(20)) +
+      '<div class="m-body"><div class="form-field"><label>Passcode for ' + esc(chunkId(session.id)) + '</label>' +
+      '<input class="inp" id="uePass" type="password" placeholder="Your owner passcode" autocomplete="off"></div>' +
+      '<div class="rp-hint">The passcode that unlocked this owner ID. It stays in this tab only.</div>' +
+      '<div class="form-err" id="ueErr"></div></div>' +
+      '<div class="m-foot"><button class="btn" data-close>Cancel</button><button class="btn btn-primary" id="ueGo">Open the sheet</button></div>');
+    const inp = $('#uePass'); inp.focus();
+    const go = () => {
+      const v = inp.value;
+      if (!v) { const er = $('#ueErr'); er.textContent = 'Please type the passcode.'; er.classList.add('show'); return; }
+      ownerSheetKey = v; try { sessionStorage.setItem('syncro.ownerKey', v); } catch (e) {}
+      closeModal(); load();
+    };
+    $('#ueGo').addEventListener('click', go);
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); } });
+  }
+  function load() {
+    fetch('/api/emails', { headers: hdrs() }).then(r => r.json()).then(j => {
+      if (!j || !j.ok) { ownerSheetKey = ''; try { sessionStorage.removeItem('syncro.ownerKey'); } catch (e) {} askPass(); return; }
+      renderSheet(j.rows || [], j.count || (j.rows || []).length, 'saved on the server as USER EMAILS.csv');
+    }).catch(err => { try { console.error('USER EMAILS server load failed:', err && (err.message || err)); } catch (e2) {} sheetSetupModal(); });
+  }
+  if (gurl) {   /* the pure-HTML path — read the rows straight from the Google Sheet */
+    jsonp(gurl).then(j => {
+      if (!j || !j.ok) throw new Error('sheet said ok:false');
+      renderSheet(j.rows || [], j.count || (j.rows || []).length, 'live from your Google Sheet');
+    }).catch(err => { try { console.error('USER EMAILS load failed:', err && (err.message || err)); } catch (e2) {} sheetSetupModal(); });
+    return;
+  }
+  if (ownerSheetKey) load(); else askPass();
+}
 function init() {
   loadDb();
   migrateLegacyUsers();
@@ -2986,11 +3831,25 @@ function init() {
   $('#chipNote').innerHTML = I.note(13) + 'Notes';
   $('#chipSheet').innerHTML = I.sheet(13) + 'Sheets';
   $('#chipBoard').innerHTML = I.board(13) + 'Boards';
+  $('#imgIco').innerHTML = I.image(13);
+  $('#addImgBtn').innerHTML = I.image(15) + 'Add image';
+  $('#inSkip').addEventListener('click', () => finishIntro('app'));
+  $('#inNext').addEventListener('click', () => introStep(2));
+  $('#inGo2').addEventListener('click', () => introStep(3));
+  $('#inGo').addEventListener('click', () => finishIntro('app'));
+  $('#inReg').addEventListener('click', () => introStep(4));
+  $('#inHave').addEventListener('click', () => finishIntro('gate-login'));
+  $('#inRId').addEventListener('input', introIdCheck);
+  $('#inRegForm').addEventListener('submit', onIntroRegister);
+  $('#inName').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('#inProf').focus(); } });
+  $('#inProf').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); finishIntro('app'); } });
   applyTheme(db.theme || 'dark');
   if (location.hash.startsWith('#sv=')) { tryOpenViewer(); return; }
-  if (db.session === 'guest') { session = { guest: true, id: null, name: 'Untitled' }; enterApp(); }
-  else if (db.session && db.users[db.session]) { const u = db.users[db.session]; session = { guest: false, id: u.id, name: u.name }; enterApp(); connectCloud(); }
-  else { guestSession(); }
+  /* EVERY visit → the notebook opens: the animation, the minimal overview,
+     the name + profession form, and a create-ID form (with email) for
+     anyone who doesn't have an account yet. */
+  flushEmailQueue();
+  runIntro();
 }
 document.addEventListener('DOMContentLoaded', init);
 </script>
